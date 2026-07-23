@@ -200,9 +200,28 @@ struct TaxonShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: ResolveTaxonIntent(),
-            phrases: ["Resolve taxon in \(.applicationName)"],
+            phrases: [
+                "Resolve a taxon in \(.applicationName)",
+                "Find a taxon with \(.applicationName)"
+            ],
             shortTitle: "Resolve Taxon",
             systemImageName: "leaf"
+        )
+        AppShortcut(
+            intent: GetTaxonNameIntent(),
+            phrases: [
+                "Get a name for \(\.$taxon) in \(.applicationName)"
+            ],
+            shortTitle: "Get Taxon Name",
+            systemImageName: "character.book.closed"
+        )
+        AppShortcut(
+            intent: GetConfiguredTaxonNamesIntent(),
+            phrases: [
+                "Get configured names for \(\.$taxon) in \(.applicationName)"
+            ],
+            shortTitle: "Get Taxon Names",
+            systemImageName: "list.bullet"
         )
     }
 }

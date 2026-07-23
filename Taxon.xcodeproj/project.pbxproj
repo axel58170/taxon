@@ -155,6 +155,14 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					80714BB1CDB15AE6B6075D8F = {
+						DevelopmentTeam = 4H5463Q72N;
+					};
+					A1DB8E95BF717BFA08605979 = {
+						DevelopmentTeam = 4H5463Q72N;
+					};
+				};
 			};
 			buildConfigurationList = 461DEF7C59D5289C5D553A85 /* Build configuration list for PBXProject "Taxon" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -298,6 +306,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4H5463Q72N;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -355,6 +364,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4H5463Q72N;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

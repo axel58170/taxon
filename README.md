@@ -65,6 +65,10 @@ The main app uses the live Wikidata provider. Package and app tests remain deter
 
 The Wikipedia-opening intent uses `OpenURLIntent`, which is available on iOS 18 and later. The rest of the app and intent surface retains the iOS 17 deployment target.
 
+### Testing App Intents
+
+Install and launch Taxon once, then open Shortcuts and choose **New Shortcut → Add Action → Apps → Taxon**. Taxon exposes **Resolve Taxon**, **Get Taxon Name**, and **Get Configured Taxon Names** on iOS 17 and later. App Intents do not add an app to the system Share Sheet; that surface requires the separate Share Extension planned for a later increment.
+
 ## Development conventions
 
 Repository-specific rules, module boundaries, provider safeguards, and testing expectations are in [AGENTS.md](AGENTS.md). Read it before changing application code.
