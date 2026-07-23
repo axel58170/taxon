@@ -41,6 +41,15 @@
 "Preferred language" = "Preferred language";
 "Configured fallback" = "Configured fallback";
 "Done" = "Done";
+"Search" = "Search";
+"Species" = "Species";
+"Below species" = "Below species";
+"Other taxa" = "Other taxa";
+"Subspecies" = "Subspecies";
+"Variety" = "Variety";
+"Form" = "Form";
+"Cultivar" = "Cultivar";
+"Genus" = "Genus";
 "No network connection is available." = "No network connection is available.";
 "The naming source asked us to try again shortly." = "The naming source asked us to try again shortly.";
 "The naming source is temporarily unavailable." = "The naming source is temporarily unavailable.";

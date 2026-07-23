@@ -41,6 +41,15 @@
 "Preferred language" = "Voorkeurstaal";
 "Configured fallback" = "Ingestelde terugval";
 "Done" = "Gereed";
+"Search" = "Zoeken";
+"Species" = "Soort";
+"Below species" = "Onder de soort";
+"Other taxa" = "Andere taxa";
+"Subspecies" = "Ondersoort";
+"Variety" = "Variëteit";
+"Form" = "Vorm";
+"Cultivar" = "Cultivar";
+"Genus" = "Geslacht";
 "No network connection is available." = "Er is geen netwerkverbinding beschikbaar.";
 "The naming source asked us to try again shortly." = "De namenbron vraagt om het binnenkort opnieuw te proberen.";
 "The naming source is temporarily unavailable." = "De namenbron is tijdelijk niet beschikbaar.";

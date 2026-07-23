@@ -19,6 +19,7 @@
 		4E943EFB0D0906CFE9C2E8D7 /* ShareTextLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */; };
 		6163E37CFA786C908BBF69E0 /* TaxonSettings in Frameworks */ = {isa = PBXBuildFile; productRef = 2E593E79D8030467B1B0B043 /* TaxonSettings */; };
 		618D4346EAB054E545AF0808 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D6D67B06D93CB32F1AB2F /* ShareViewController.swift */; };
+		621B95BC5CADC0434FAF1ED3 /* CandidateHierarchyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 719AFC7E1CE89213E6E98F75 /* CandidateHierarchyTests.swift */; };
 		62FF1B9C346D26FFB66EB3CE /* TaxonSettings in Frameworks */ = {isa = PBXBuildFile; productRef = 98C2C2907F8159DA02BA3942 /* TaxonSettings */; };
 		671EB303EEA3055D85833686 /* ShareTextLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */; };
 		7203C4C1580D943B4C6237C0 /* SearchModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484303881E854943D4373B74 /* SearchModelTests.swift */; };
@@ -27,6 +28,7 @@
 		BB5B050DFDCEB5735FA652A1 /* MockTaxonResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410776D309216F459D15BBC2 /* MockTaxonResolver.swift */; };
 		C1FF164368B639CBDDA07021 /* ShareTextLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01267AAFB5969E429F5B9FA9 /* ShareTextLoaderTests.swift */; };
 		C99A40F06843932422C015F4 /* TaxonDomain in Frameworks */ = {isa = PBXBuildFile; productRef = E45FC48E09BAF84A0A831D27 /* TaxonDomain */; };
+		CD7947F0059775F4858A92B0 /* CandidateHierarchy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AA057F73197CD76D6654F2 /* CandidateHierarchy.swift */; };
 		D42C5DA1108BC6B4C8C12E72 /* TaxonDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 26A468F0874ECCBD3063DDE6 /* TaxonDomain */; };
 		E1E96BAF17325ADFEB61AD4E /* ShareResultFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */; };
 		E9686DD8B5F814E0E7C49BDE /* TaxonLanguagePresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E92AA7B90E02CA718028A1F /* TaxonLanguagePresentation.swift */; };
@@ -79,6 +81,7 @@
 		25D945F9B5DDC77030EC5B92 /* Taxon.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Taxon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2900F2AFB0C96D27961E765E /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2C4D6D67B06D93CB32F1AB2F /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		34AA057F73197CD76D6654F2 /* CandidateHierarchy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidateHierarchy.swift; sourceTree = "<group>"; };
 		410776D309216F459D15BBC2 /* MockTaxonResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTaxonResolver.swift; sourceTree = "<group>"; };
 		4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareResultFormatter.swift; sourceTree = "<group>"; };
 		4703850173C27008A82523AB /* ShareLookupModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLookupModel.swift; sourceTree = "<group>"; };
@@ -89,6 +92,7 @@
 		5A1785A196B1B894A3659DD0 /* TaxonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonApp.swift; sourceTree = "<group>"; };
 		6793117EECE20D8F1FDD641C /* TaxonIntentFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonIntentFormattingTests.swift; sourceTree = "<group>"; };
 		6C7AE58314F10F369F665D09 /* TaxonShareExtensionTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TaxonShareExtensionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		719AFC7E1CE89213E6E98F75 /* CandidateHierarchyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidateHierarchyTests.swift; sourceTree = "<group>"; };
 		73EDBE794F63BCF3E5035993 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8C28B7847CF8194CEF9B3F2F /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		998466F992CABDF5C5A20B14 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -163,6 +167,7 @@
 			isa = PBXGroup;
 			children = (
 				998466F992CABDF5C5A20B14 /* .gitkeep */,
+				34AA057F73197CD76D6654F2 /* CandidateHierarchy.swift */,
 				0B49E6BCB4ED14F1C4DEA8F2 /* Localizable.strings */,
 				410776D309216F459D15BBC2 /* MockTaxonResolver.swift */,
 				EF892695383D2E4DC014F8D7 /* SearchModel.swift */,
@@ -187,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				A797D23631B7154AB1D6FC23 /* .gitkeep */,
+				719AFC7E1CE89213E6E98F75 /* CandidateHierarchyTests.swift */,
 				484303881E854943D4373B74 /* SearchModelTests.swift */,
 				6793117EECE20D8F1FDD641C /* TaxonIntentFormattingTests.swift */,
 			);
@@ -389,6 +395,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD7947F0059775F4858A92B0 /* CandidateHierarchy.swift in Sources */,
 				BB5B050DFDCEB5735FA652A1 /* MockTaxonResolver.swift in Sources */,
 				21D13463208BC2DFC30F1CFC /* SearchModel.swift in Sources */,
 				4798122FCC706DEE57BD7EA2 /* TaxonApp.swift in Sources */,
@@ -402,6 +409,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				621B95BC5CADC0434FAF1ED3 /* CandidateHierarchyTests.swift in Sources */,
 				7203C4C1580D943B4C6237C0 /* SearchModelTests.swift in Sources */,
 				F14F4D1A06CB88FA26A2127D /* TaxonIntentFormattingTests.swift in Sources */,
 			);

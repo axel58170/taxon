@@ -110,6 +110,12 @@ final class SearchModel {
         state = .resolved(candidate.taxon)
     }
 
+    func startNewSearch() {
+        searchTask?.cancel()
+        queryText = ""
+        state = .idle
+    }
+
     @discardableResult
     func addLanguage(input: String) async -> Bool {
         guard

@@ -41,6 +41,15 @@
 "Preferred language" = "Langue préférée";
 "Configured fallback" = "Langues configurées";
 "Done" = "OK";
+"Search" = "Rechercher";
+"Species" = "Espèce";
+"Below species" = "Sous l’espèce";
+"Other taxa" = "Autres taxons";
+"Subspecies" = "Sous-espèce";
+"Variety" = "Variété";
+"Form" = "Forme";
+"Cultivar" = "Cultivar";
+"Genus" = "Genre";
 "No network connection is available." = "Aucune connexion réseau n’est disponible.";
 "The naming source asked us to try again shortly." = "La source des noms demande de réessayer dans quelques instants.";
 "The naming source is temporarily unavailable." = "La source des noms est temporairement indisponible.";

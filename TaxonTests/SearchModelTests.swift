@@ -58,6 +58,17 @@ struct SearchModelTests {
         #expect(candidates.count == 2)
     }
 
+    @Test("Starting a new search returns a resolved result to the home state")
+    func startsNewSearchFromResult() async {
+        let model = SearchModel(resolver: MockTaxonResolver())
+        await model.resolveImmediately("Apis mellifera")
+
+        model.startNewSearch()
+
+        #expect(model.queryText.isEmpty)
+        #expect(model.state == .idle)
+    }
+
     @Test("Search dismissal preserves a result until a new query begins")
     func preservesResolvedStateWhenSearchDismissalClearsQuery() async {
         let resolver = SuspendedSearchResolver()

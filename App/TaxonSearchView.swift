@@ -22,7 +22,8 @@ struct TaxonSearchView: View {
                     TaxonResultView(
                         taxon: taxon,
                         configuration: model.outputConfiguration,
-                        preferredWikipediaLanguage: model.preferredWikipediaLanguage
+                        preferredWikipediaLanguage: model.preferredWikipediaLanguage,
+                        startNewSearch: model.startNewSearch
                     )
                 case .noMatch:
                     ContentUnavailableView.search(text: model.queryText)
@@ -183,26 +184,61 @@ private struct CandidateList: View {
     let select: (TaxonCandidate) -> Void
 
     var body: some View {
-        List(candidates) { candidate in
-            Button {
-                select(candidate)
-            } label: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(candidate.taxon.scientificName.value)
-                        .font(.headline)
-                        .italic()
-                    if let matchedName = candidate.matchedName {
-                        Text(matchedName)
-                            .foregroundStyle(.secondary)
+        List {
+            ForEach(CandidateHierarchy.sections(for: candidates)) { section in
+                Section {
+                    ForEach(section.candidates) { candidate in
+                        Button {
+                            select(candidate)
+                        } label: {
+                            HStack(alignment: .top, spacing: 10) {
+                                if section.kind == .infraspecific {
+                                    Image(systemName: "arrow.turn.down.right")
+                                        .font(.caption)
+                                        .foregroundStyle(.tertiary)
+                                        .accessibilityHidden(true)
+                                }
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(candidate.taxon.scientificName.value)
+                                        .font(.headline)
+                                        .italic()
+                                    if let matchedName = candidate.matchedName,
+                                       TaxonSearchQuery.normalize(matchedName)
+                                        != TaxonSearchQuery.normalize(candidate.taxon.scientificName.value) {
+                                        Text(matchedName)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    if let rank = candidate.taxon.rank {
+                                        Text(localizedRankName(rank))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                        .accessibilityLabel(candidate.taxon.scientificName.value)
                     }
-                    if let rank = candidate.taxon.rank {
-                        Text(rank.name.capitalized)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                } header: {
+                    Text(section.title)
                 }
             }
-            .accessibilityLabel(candidate.taxon.scientificName.value)
+        }
+    }
+}
+
+private extension CandidateHierarchy.Section {
+    var title: LocalizedStringKey {
+        switch kind {
+        case .species: "Species"
+        case .infraspecific:
+            if candidates.allSatisfy({
+                $0.taxon.rank?.name.caseInsensitiveCompare("subspecies") == .orderedSame
+            }) {
+                "Subspecies"
+            } else {
+                "Below species"
+            }
+        case .other: "Other taxa"
         }
     }
 }
@@ -211,6 +247,7 @@ private struct TaxonResultView: View {
     let taxon: Taxon
     let configuration: OutputLanguageConfiguration
     let preferredWikipediaLanguage: TaxonLanguage?
+    let startNewSearch: () -> Void
 
     var body: some View {
         List {
@@ -223,7 +260,7 @@ private struct TaxonResultView: View {
             if let rank = taxon.rank {
                 Section("Taxon") {
                     HStack(spacing: 12) {
-                        Label(rank.name.capitalized, systemImage: "point.3.connected.trianglepath.dotted")
+                        Label(localizedRankName(rank), systemImage: "point.3.connected.trianglepath.dotted")
                         Spacer(minLength: 8)
                         Text(taxon.wikidataID.rawValue)
                             .foregroundStyle(.secondary)
@@ -249,7 +286,16 @@ private struct TaxonResultView: View {
         .contentMargins(.top, 4, for: .scrollContent)
         .navigationTitle(taxon.scientificName.value)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Search", systemImage: "chevron.backward", action: startNewSearch)
+            }
+        }
     }
+}
+
+private func localizedRankName(_ rank: TaxonomicRank) -> String {
+    String(localized: String.LocalizationValue(rank.name.capitalized))
 }
 
 private struct NameRow: View {
