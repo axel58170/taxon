@@ -10,7 +10,10 @@ struct TaxonSearchView: View {
             Group {
                 switch model.state {
                 case .idle:
-                    TaxonSearchWelcome(resolve: model.resolveImmediately)
+                    TaxonSearchWelcome(
+                        languages: model.configuredLanguages,
+                        resolve: model.resolveImmediately
+                    )
                 case .loading:
                     ProgressView("Resolving taxon…")
                 case let .candidates(candidates):
@@ -31,14 +34,14 @@ struct TaxonSearchView: View {
             .background {
                 SearchDismissObserver(shouldDismiss: isShowingResolvedTaxon)
             }
-            .searchable(text: $model.queryText, prompt: "Common or scientific name")
+            .searchable(text: $model.queryText, prompt: "Name in any configured language")
             .onChange(of: model.queryText) { _, _ in model.searchTextDidChange() }
             .onSubmit(of: .search) {
                 Task { await model.resolveImmediately(model.queryText) }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Languages", systemImage: "slider.horizontal.3") {
+                    Button("Languages", systemImage: "globe") {
                         showingSettings = true
                     }
                     .accessibilityLabel("Configure languages")
@@ -57,26 +60,60 @@ struct TaxonSearchView: View {
 }
 
 private struct TaxonSearchWelcome: View {
+    let languages: [TaxonLanguage]
     let resolve: (String) async -> Void
 
     private let examples = [
-        TaxonSearchExample(name: "English oak", scientificName: "Quercus robur", symbol: "tree"),
-        TaxonSearchExample(name: "Common daisy", scientificName: "Bellis perennis", symbol: "camera.macro"),
-        TaxonSearchExample(name: "Red fox", scientificName: "Vulpes vulpes", symbol: "pawprint"),
-        TaxonSearchExample(name: "Western honey bee", scientificName: "Apis mellifera", symbol: "ladybug")
+        TaxonSearchExample(name: String(localized: "English oak"), scientificName: "Quercus robur", symbol: "tree"),
+        TaxonSearchExample(name: String(localized: "Common daisy"), scientificName: "Bellis perennis", symbol: "camera.macro"),
+        TaxonSearchExample(name: String(localized: "Red fox"), scientificName: "Vulpes vulpes", symbol: "pawprint"),
+        TaxonSearchExample(name: String(localized: "Western honey bee"), scientificName: "Apis mellifera", symbol: "ladybug")
     ]
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                ContentUnavailableView(
-                    "Find any taxon",
-                    systemImage: "leaf",
-                    description: Text("Search a common or scientific name.")
-                )
+            VStack(spacing: 28) {
+                VStack(spacing: 12) {
+                    Image(systemName: "character.book.closed.fill")
+                        .font(.system(size: 42))
+                        .foregroundStyle(.tint)
+                        .accessibilityHidden(true)
+
+                    Text("Names in every language")
+                        .font(.title2.bold())
+                        .multilineTextAlignment(.center)
+
+                    Text("Search once. See the common name in all your configured languages.")
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your languages")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(languages) { language in
+                                    Label(
+                                        TaxonLanguagePresentation.displayName(for: language),
+                                        systemImage: "character"
+                                    )
+                                    .font(.subheadline.weight(.medium))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 7)
+                                    .background(.tint.opacity(0.12), in: Capsule())
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 4)
+                }
+                .padding(.horizontal)
 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Try an example")
+                    Text("Try a taxon")
                         .font(.headline)
 
                     LazyVGrid(
@@ -105,7 +142,7 @@ private struct TaxonSearchWelcome: View {
                                 .padding(.horizontal, 12)
                             }
                             .buttonStyle(.bordered)
-                            .accessibilityHint("Searches Wikidata for \(example.scientificName)")
+                            .accessibilityHint("Searches for \(example.scientificName)")
                         }
                     }
                 }
@@ -177,8 +214,14 @@ private struct TaxonResultView: View {
 
     var body: some View {
         List {
+            Section("Names in your languages") {
+                ForEach(configuration.displayRows(for: taxon)) { row in
+                    NameRow(row: row)
+                }
+            }
+
             if let rank = taxon.rank {
-                Section {
+                Section("Taxon") {
                     HStack(spacing: 12) {
                         Label(rank.name.capitalized, systemImage: "point.3.connected.trianglepath.dotted")
                         Spacer(minLength: 8)
@@ -186,12 +229,6 @@ private struct TaxonResultView: View {
                             .foregroundStyle(.secondary)
                     }
                     .font(.subheadline)
-                }
-            }
-
-            Section("Names") {
-                ForEach(configuration.displayRows(for: taxon)) { row in
-                    NameRow(row: row)
                 }
             }
 
@@ -217,6 +254,7 @@ private struct TaxonResultView: View {
 
 private struct NameRow: View {
     let row: TaxonDisplayRow
+    @State private var copied = false
 
     private var label: String {
         switch row {
@@ -242,11 +280,20 @@ private struct NameRow: View {
                 Text(name)
                     .multilineTextAlignment(.trailing)
                     .italic(isScientific)
-                Button("Copy", systemImage: "doc.on.doc") {
-                    UIPasteboard.general.string = name
+                Button {
+                    copy(name)
+                } label: {
+                    Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
+                        .contentTransition(.symbolEffect(.replace))
                 }
                 .labelStyle(.iconOnly)
-                .accessibilityLabel("Copy \(label) name")
+                .foregroundStyle(copied ? Color.green : Color.accentColor)
+                .accessibilityLabel(
+                    copied
+                        ? String(localized: "Copied")
+                        : String(localized: "Copy \(label) name")
+                )
+                .sensoryFeedback(.success, trigger: copied)
             } else {
                 Text("Not available")
                     .foregroundStyle(.secondary)
@@ -260,6 +307,15 @@ private struct NameRow: View {
         if case .scientific = row { return true }
         return false
     }
+
+    private func copy(_ name: String) {
+        UIPasteboard.general.string = name
+        copied = true
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            copied = false
+        }
+    }
 }
 
 private struct LanguageSettings: View {
@@ -271,7 +327,7 @@ private struct LanguageSettings: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Languages") {
+                Section {
                     ForEach(model.configuredLanguages) { language in
                         Text(TaxonLanguagePresentation.displayName(for: language))
                     }
@@ -293,6 +349,10 @@ private struct LanguageSettings: View {
                                 .map(model.configuredLanguages.contains) != false
                         )
                     }
+                } header: {
+                    Text("Languages")
+                } footer: {
+                    Text("Search in any of these languages. Results include every language in this order.")
                 }
 
                 Section("Scientific name") {

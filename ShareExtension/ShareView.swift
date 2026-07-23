@@ -4,6 +4,7 @@ import TaxonDomain
 struct ShareView: View {
     @Bindable var model: ShareLookupModel
     let close: () -> Void
+    @State private var copiedAll = false
 
     var body: some View {
         NavigationStack {
@@ -52,29 +53,66 @@ struct ShareView: View {
         return List {
             Section("Names") {
                 ForEach(rows) { row in
-                    HStack(alignment: .firstTextBaseline) {
-                        Text(localizedLabel(row.label)).foregroundStyle(.secondary)
-                        Spacer()
-                        if let value = row.value {
-                            Text(value).italic(row.isScientific).multilineTextAlignment(.trailing)
-                            Button("Copy", systemImage: "doc.on.doc") { UIPasteboard.general.string = value }
-                                .labelStyle(.iconOnly)
-                        } else {
-                            Text("Not available").foregroundStyle(.secondary)
-                        }
-                    }
+                    ShareNameRow(row: row, label: localizedLabel(row))
                 }
             }
             Section {
-                Button("Copy all", systemImage: "doc.on.doc.fill") {
+                Button {
                     UIPasteboard.general.string = ShareResultFormatter.formattedAvailableRows(rows)
+                    copiedAll = true
+                    Task {
+                        try? await Task.sleep(for: .seconds(1.5))
+                        copiedAll = false
+                    }
+                } label: {
+                    Label(
+                        copiedAll ? String(localized: "Copied") : String(localized: "Copy all"),
+                        systemImage: copiedAll ? "checkmark.circle.fill" : "doc.on.doc.fill"
+                    )
                 }
+                .foregroundStyle(copiedAll ? Color.green : Color.accentColor)
+                .contentTransition(.symbolEffect(.replace))
+                .sensoryFeedback(.success, trigger: copiedAll)
             }
         }
     }
 
-    private func localizedLabel(_ code: String) -> String {
-        guard code != "Scientific" else { return code }
-        return Locale.current.localizedString(forLanguageCode: code) ?? code
+    private func localizedLabel(_ row: ShareResultRow) -> String {
+        guard !row.isScientific else { return row.label }
+        return Locale.current.localizedString(forLanguageCode: row.label) ?? row.label
+    }
+}
+
+private struct ShareNameRow: View {
+    let row: ShareResultRow
+    let label: String
+    @State private var copied = false
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label).foregroundStyle(.secondary)
+            Spacer()
+            if let value = row.value {
+                Text(value).italic(row.isScientific).multilineTextAlignment(.trailing)
+                Button {
+                    UIPasteboard.general.string = value
+                    copied = true
+                    Task {
+                        try? await Task.sleep(for: .seconds(1.5))
+                        copied = false
+                    }
+                } label: {
+                    Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
+                        .contentTransition(.symbolEffect(.replace))
+                }
+                .foregroundStyle(copied ? Color.green : Color.accentColor)
+                .accessibilityLabel(
+                    copied ? String(localized: "Copied") : String(localized: "Copy")
+                )
+                .sensoryFeedback(.success, trigger: copied)
+            } else {
+                Text("Not available").foregroundStyle(.secondary)
+            }
+        }
     }
 }

@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		033C837A70CEE5D577A52028 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0B44B95E4B6E2C301503B01C /* Localizable.strings */; };
 		03A09F090E440D4A62791028 /* ShareResultFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CF0F54D62C5F76BBC4782F /* ShareResultFormatterTests.swift */; };
+		0400CE91CD5ACF5B7CA1C482 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0B49E6BCB4ED14F1C4DEA8F2 /* Localizable.strings */; };
 		052AFFBB535DBAAF47835266 /* TaxonSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028DB7F4190F81F3600B1D88 /* TaxonSearchView.swift */; };
 		0644FAD17B3F247898421185 /* ShareResultFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */; };
 		0CC4F274AE76DC464A5743C9 /* WikidataProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 0CDE34F94AD5167A85DA93F5 /* WikidataProvider */; };
@@ -75,22 +77,30 @@
 		25509033F973E037A627D1D2 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
 		25CF0F54D62C5F76BBC4782F /* ShareResultFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareResultFormatterTests.swift; sourceTree = "<group>"; };
 		25D945F9B5DDC77030EC5B92 /* Taxon.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Taxon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2900F2AFB0C96D27961E765E /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2C4D6D67B06D93CB32F1AB2F /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		410776D309216F459D15BBC2 /* MockTaxonResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTaxonResolver.swift; sourceTree = "<group>"; };
 		4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareResultFormatter.swift; sourceTree = "<group>"; };
 		4703850173C27008A82523AB /* ShareLookupModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLookupModel.swift; sourceTree = "<group>"; };
 		480FF31E468C91C4D1ABC325 /* TaxonShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TaxonShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		484303881E854943D4373B74 /* SearchModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModelTests.swift; sourceTree = "<group>"; };
+		4C9A81F2533160EE4AFBCE5F /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4E3B6FDEDD5BFE4A50BF9E4B /* TaxonKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TaxonKit; path = Packages/TaxonKit; sourceTree = SOURCE_ROOT; };
 		5A1785A196B1B894A3659DD0 /* TaxonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonApp.swift; sourceTree = "<group>"; };
 		6793117EECE20D8F1FDD641C /* TaxonIntentFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonIntentFormattingTests.swift; sourceTree = "<group>"; };
 		6C7AE58314F10F369F665D09 /* TaxonShareExtensionTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TaxonShareExtensionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		73EDBE794F63BCF3E5035993 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		8C28B7847CF8194CEF9B3F2F /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		998466F992CABDF5C5A20B14 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		9C74138A78A614F6F2A584CA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A25CBE25E959479FE9019246 /* TaxonShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TaxonShareExtension.entitlements; sourceTree = "<group>"; };
 		A3841FF0A1E29D3579F1B6B8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A68EEF7FE28A6CBEBEDE64AB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A797D23631B7154AB1D6FC23 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B15B1C2AA551CDA559465E16 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C75B55AA8D8188E33BACB2B9 /* TaxonIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonIntents.swift; sourceTree = "<group>"; };
 		EF892695383D2E4DC014F8D7 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
+		F5A3F3234A50C4A0366D1CB0 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				A3841FF0A1E29D3579F1B6B8 /* Info.plist */,
+				0B44B95E4B6E2C301503B01C /* Localizable.strings */,
 				4703850173C27008A82523AB /* ShareLookupModel.swift */,
 				4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */,
 				1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */,
@@ -152,6 +163,7 @@
 			isa = PBXGroup;
 			children = (
 				998466F992CABDF5C5A20B14 /* .gitkeep */,
+				0B49E6BCB4ED14F1C4DEA8F2 /* Localizable.strings */,
 				410776D309216F459D15BBC2 /* MockTaxonResolver.swift */,
 				EF892695383D2E4DC014F8D7 /* SearchModel.swift */,
 				1C8A43B034AE81FEE4D672F2 /* Taxon.entitlements */,
@@ -231,6 +243,7 @@
 			buildConfigurationList = BCD6E536F9FB14876976807B /* Build configuration list for PBXNativeTarget "Taxon" */;
 			buildPhases = (
 				B68A4CC461E8CF9D36C93288 /* Sources */,
+				95153288C955888F3CF5DE9B /* Resources */,
 				EDA983030A49C76722E0F4BD /* Frameworks */,
 				063C4016F965769CB448D965 /* Embed Foundation Extensions */,
 			);
@@ -272,6 +285,7 @@
 			buildConfigurationList = 5F95A06AFEF8AB106E760079 /* Build configuration list for PBXNativeTarget "TaxonShareExtension" */;
 			buildPhases = (
 				57FB918491EBEB689F3768C6 /* Sources */,
+				ADA0A8C14B434FE311127022 /* Resources */,
 				17B8EBA0EEA6E3098A030C40 /* Frameworks */,
 			);
 			buildRules = (
@@ -318,6 +332,9 @@
 			knownRegions = (
 				Base,
 				en,
+				fr,
+				it,
+				nl,
 			);
 			mainGroup = B303A8588DD239A9FD94633A;
 			minimizedProjectReferenceProxies = 1;
@@ -335,6 +352,25 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		95153288C955888F3CF5DE9B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0400CE91CD5ACF5B7CA1C482 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ADA0A8C14B434FE311127022 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				033C837A70CEE5D577A52028 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		57FB918491EBEB689F3768C6 /* Sources */ = {
@@ -396,6 +432,31 @@
 			targetProxy = B9E0998331952192D44D6C00 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		0B44B95E4B6E2C301503B01C /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A68EEF7FE28A6CBEBEDE64AB /* en */,
+				F5A3F3234A50C4A0366D1CB0 /* fr */,
+				4C9A81F2533160EE4AFBCE5F /* it */,
+				73EDBE794F63BCF3E5035993 /* nl */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		0B49E6BCB4ED14F1C4DEA8F2 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9C74138A78A614F6F2A584CA /* en */,
+				2900F2AFB0C96D27961E765E /* fr */,
+				8C28B7847CF8194CEF9B3F2F /* it */,
+				B15B1C2AA551CDA559465E16 /* nl */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		19D4FA8207E2CB96F8ADB05D /* Debug */ = {

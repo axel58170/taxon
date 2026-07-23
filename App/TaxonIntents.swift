@@ -243,9 +243,10 @@ enum TaxonIntentFormatting {
     static func formattedNames(for taxon: Taxon, configuration: OutputLanguageConfiguration) -> String {
         configuration.displayRows(for: taxon).map { row in
             switch row {
-            case let .scientific(name): return "Scientific: \(name.value)"
+            case let .scientific(name):
+                return "\(String(localized: "Scientific")): \(name.value)"
             case let .localized(language, name):
-                return "\(language.rawValue): \(name?.displayValue ?? "Not available")"
+                return "\(language.rawValue): \(name?.displayValue ?? String(localized: "Not available"))"
             }
         }.joined(separator: "\n")
     }
@@ -272,12 +273,12 @@ enum TaxonIntentError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .emptyQuery: return "Enter a common or scientific taxon name."
-        case .noMatchingTaxon: return "No matching taxon was found."
-        case .selectionUnavailable: return "The selected taxon is no longer available."
-        case .invalidLanguage: return "Enter a valid language code, such as en or fr."
-        case .nameUnavailable: return "That name is not available in the requested language."
-        case .wikipediaUnavailable: return "No Wikipedia article is available for this taxon."
+        case .emptyQuery: return String(localized: "Enter a common or scientific taxon name.")
+        case .noMatchingTaxon: return String(localized: "No matching taxon was found.")
+        case .selectionUnavailable: return String(localized: "The selected taxon is no longer available.")
+        case .invalidLanguage: return String(localized: "Enter a valid language code, such as en or fr.")
+        case .nameUnavailable: return String(localized: "That name is not available in the requested language.")
+        case .wikipediaUnavailable: return String(localized: "No Wikipedia article is available for this taxon.")
         }
     }
 }

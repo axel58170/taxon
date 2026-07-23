@@ -33,7 +33,7 @@ final class ShareLookupModel {
 
     func resolve(_ text: String) async {
         guard let query = TaxonSearchQuery(text) else {
-            state = .failed("The shared item does not contain a taxon name.")
+            state = .failed(String(localized: "The shared item does not contain a taxon name."))
             return
         }
         state = .resolving
@@ -46,7 +46,7 @@ final class ShareLookupModel {
         } catch let error as TaxonResolutionError {
             state = .failed(Self.message(for: error))
         } catch {
-            state = .failed("Taxon lookup could not be completed.")
+            state = .failed(String(localized: "Taxon lookup could not be completed."))
         }
     }
 
@@ -55,15 +55,15 @@ final class ShareLookupModel {
     }
 
     func failToLoadInput() {
-        state = .failed("Taxon could not read plain text from the shared item.")
+        state = .failed(String(localized: "Taxon could not read plain text from the shared item."))
     }
 
     private static func message(for error: TaxonResolutionError) -> String {
         switch error {
-        case .networkUnavailable: return "No network connection is available."
-        case .rateLimited: return "Wikidata asked Taxon to try again shortly."
-        case .temporaryServerFailure: return "Wikidata is temporarily unavailable."
-        case .invalidProviderResponse: return "Wikidata returned an unreadable response."
+        case .networkUnavailable: return String(localized: "No network connection is available.")
+        case .rateLimited: return String(localized: "Wikidata asked Taxon to try again shortly.")
+        case .temporaryServerFailure: return String(localized: "Wikidata is temporarily unavailable.")
+        case .invalidProviderResponse: return String(localized: "Wikidata returned an unreadable response.")
         }
     }
 }

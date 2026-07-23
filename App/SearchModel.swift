@@ -83,7 +83,7 @@ final class SearchModel {
                 self?.state = .failed(Self.message(for: error))
             } catch {
                 guard !Task.isCancelled else { return }
-                self?.state = .failed("Taxon lookup could not be completed.")
+                self?.state = .failed(String(localized: "Taxon lookup could not be completed."))
             }
         }
     }
@@ -101,7 +101,7 @@ final class SearchModel {
         } catch let error as TaxonResolutionError {
             state = .failed(Self.message(for: error))
         } catch {
-            state = .failed("Taxon lookup could not be completed.")
+            state = .failed(String(localized: "Taxon lookup could not be completed."))
         }
     }
 
@@ -161,10 +161,10 @@ final class SearchModel {
 
     private static func message(for error: TaxonResolutionError) -> String {
         switch error {
-        case .networkUnavailable: return "No network connection is available."
-        case .rateLimited: return "The naming source asked us to try again shortly."
-        case .temporaryServerFailure: return "The naming source is temporarily unavailable."
-        case .invalidProviderResponse: return "The naming source returned an unreadable response."
+        case .networkUnavailable: return String(localized: "No network connection is available.")
+        case .rateLimited: return String(localized: "The naming source asked us to try again shortly.")
+        case .temporaryServerFailure: return String(localized: "The naming source is temporarily unavailable.")
+        case .invalidProviderResponse: return String(localized: "The naming source returned an unreadable response.")
         }
     }
 }

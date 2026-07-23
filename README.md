@@ -6,6 +6,8 @@ Taxon is a lightweight iOS utility for resolving biological taxa—including ani
 
 The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered languages, a reusable domain package, fixture-tested Wikidata resolution, App Intents, and a plain-text Share Extension. Durable caching and the remaining v1 acceptance criteria are intentionally deferred.
 
+The app and Share Extension are localized in English, French, Dutch, and Italian. The interface language follows iOS and is independent of the ordered languages configured for taxon lookup and results.
+
 ## Architecture
 
 ```text

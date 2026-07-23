@@ -13,7 +13,12 @@ enum ShareResultFormatter {
         configuration.displayRows(for: taxon).map { row in
             switch row {
             case let .scientific(name):
-                return ShareResultRow(id: "scientific", label: "Scientific", value: name.value, isScientific: true)
+                return ShareResultRow(
+                    id: "scientific",
+                    label: String(localized: "Scientific"),
+                    value: name.value,
+                    isScientific: true
+                )
             case let .localized(language, name):
                 return ShareResultRow(
                     id: "localized-\(language.rawValue)",
