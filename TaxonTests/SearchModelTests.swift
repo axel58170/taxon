@@ -92,20 +92,20 @@ struct SearchModelTests {
         #expect(model.state == .noMatch)
     }
 
-    @Test("Output language edits preserve order and ignore duplicates")
-    func editsOutputLanguages() async {
+    @Test("Language edits add directly, delete by offsets, and preserve moved order")
+    func editsLanguages() async {
         let model = SearchModel(resolver: MockTaxonResolver())
 
-        await model.addLanguage(input: "de")
-        await model.addLanguage(input: "DE")
+        #expect(await model.addLanguage(input: "de"))
+        #expect(await !model.addLanguage(input: "DE"))
         model.moveLanguages(from: IndexSet(integer: 3), to: 0)
         model.removeLanguages(at: IndexSet(integer: 1))
 
         #expect(model.configuredLanguages.map(\.rawValue) == ["de", "fr", "nl"])
     }
 
-    @Test("Output setting edits persist and initialize the next model")
-    func persistsOutputSettings() async {
+    @Test("Language deletion and moved ordering persist into the next model")
+    func persistsLanguageEdits() async {
         let suiteName = "SearchModelTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }

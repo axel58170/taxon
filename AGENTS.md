@@ -20,7 +20,7 @@
 - Favor small immutable value types. Inject dependencies through protocols; do not create hidden global service singletons.
 - Preserve the distinction between no result, ambiguity, unavailable localized name, network failure, decoding failure, and rate limiting.
 - Normalize query text locally for matching, but preserve the original text for provider requests and display.
-- Model configured output languages as ordered source language codes, not just `Locale` values. Scientific name placement is a separate setting.
+- Model configured input/output languages as ordered source language codes, not just `Locale` values. Scientific name placement is a separate setting.
 
 ## Provider conventions
 

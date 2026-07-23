@@ -38,14 +38,14 @@ struct TaxonSearchView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Output languages", systemImage: "slider.horizontal.3") {
+                    Button("Languages", systemImage: "slider.horizontal.3") {
                         showingSettings = true
                     }
-                    .accessibilityLabel("Configure output languages")
+                    .accessibilityLabel("Configure languages")
                 }
             }
             .sheet(isPresented: $showingSettings) {
-                OutputLanguageSettings(model: model)
+                LanguageSettings(model: model)
             }
         }
     }
@@ -262,10 +262,11 @@ private struct NameRow: View {
     }
 }
 
-private struct OutputLanguageSettings: View {
+private struct LanguageSettings: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var model: SearchModel
     @State private var languageCode = ""
+    @FocusState private var isLanguageFieldFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -281,12 +282,11 @@ private struct OutputLanguageSettings: View {
                         TextField("Language code", text: $languageCode)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .focused($isLanguageFieldFocused)
+                            .submitLabel(.done)
+                            .onSubmit { addLanguage() }
                         Button("Add") {
-                            Task {
-                                if await model.addLanguage(input: languageCode) {
-                                    languageCode = ""
-                                }
-                            }
+                            addLanguage()
                         }
                         .disabled(
                             TaxonLanguagePresentation.language(from: languageCode)
@@ -313,12 +313,21 @@ private struct OutputLanguageSettings: View {
                     }
                 }
             }
-            .navigationTitle("Output languages")
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("Languages")
+            .task { isLanguageFieldFocused = true }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
-                ToolbarItem(placement: .topBarTrailing) { EditButton() }
+            }
+        }
+    }
+
+    private func addLanguage() {
+        Task {
+            if await model.addLanguage(input: languageCode) {
+                languageCode = ""
             }
         }
     }

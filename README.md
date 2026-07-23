@@ -4,7 +4,7 @@ Taxon is a lightweight iOS utility for resolving biological taxa—including ani
 
 ## Status
 
-The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered output languages, a reusable domain package, fixture-tested Wikidata resolution, App Intents, and a plain-text Share Extension. Durable caching and the remaining v1 acceptance criteria are intentionally deferred.
+The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered languages, a reusable domain package, fixture-tested Wikidata resolution, App Intents, and a plain-text Share Extension. Durable caching and the remaining v1 acceptance criteria are intentionally deferred.
 
 ## Architecture
 
@@ -18,7 +18,7 @@ Taxon (iOS application)
     │   ├── query normalization and resolution rules
     │   └── provider protocols
     ├── TaxonSettings
-    │   └── App Group-backed output-language configuration
+    │   └── App Group-backed language configuration
     └── WikidataProvider
         ├── Action API and SPARQL transport
         ├── response DTOs and mapping
@@ -75,7 +75,7 @@ Install and launch Taxon once, then open Shortcuts and choose **New Shortcut →
 
 ### Testing the Share Extension
 
-Install and launch Taxon once, configure the output languages, then select or share plain text from another app. Choose **Taxon** in the Share Sheet. The extension resolves the text and displays every configured language plus the scientific name, preserving the configured order. Individual available names and the complete available result can be copied.
+Install and launch Taxon once, configure the languages, then select or share plain text from another app. Choose **Taxon** in the Share Sheet. The extension resolves the text and displays every configured language plus the scientific name, preserving the configured order. Individual available names and the complete available result can be copied.
 
 ## Development conventions
 
