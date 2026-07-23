@@ -5,7 +5,7 @@ import TaxonDomain
 struct MockTaxonResolver: TaxonResolving {
     private let taxa: [Taxon] = [
         Self.makeTaxon(
-            id: "Q25443",
+            id: "Q170466",
             scientificName: "Pernis apivorus",
             rank: "species",
             names: [("en", "European Honey-buzzard"), ("fr", "Bondrée apivore"), ("nl", "Wespendief")],

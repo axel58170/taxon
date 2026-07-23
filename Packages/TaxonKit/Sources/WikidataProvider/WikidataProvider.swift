@@ -265,11 +265,29 @@ private struct EntityResponse: Decodable {
 
         var wikipediaSitelinks: [WikipediaSitelink] {
             (sitelinks ?? [:]).values.compactMap { link in
-                guard link.site.hasSuffix("wiki"), link.site != "commonswiki",
-                      let language = TaxonLanguage(rawValue: String(link.site.dropLast(4))),
-                      let url = link.url else { return nil }
+                guard let language = wikipediaLanguage(for: link.site),
+                      let url = link.url ?? wikipediaURL(site: link.site, title: link.title) else { return nil }
                 return WikipediaSitelink(language: language, title: link.title, url: url)
             }.sorted { $0.language < $1.language }
+        }
+
+        private func wikipediaLanguage(for site: String) -> TaxonLanguage? {
+            let nonWikipediaSites: Set<String> = [
+                "commonswiki", "mediawikiwiki", "metawiki", "outreachwiki", "specieswiki", "wikidatawiki"
+            ]
+            guard site.hasSuffix("wiki"), !nonWikipediaSites.contains(site) else { return nil }
+            return TaxonLanguage(rawValue: String(site.dropLast(4)))
+        }
+
+        private func wikipediaURL(site: String, title: String) -> URL? {
+            let languageCode = String(site.dropLast(4)).replacingOccurrences(of: "_", with: "-")
+            let titleCharacters = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
+            guard let encodedTitle = title.addingPercentEncoding(withAllowedCharacters: titleCharacters) else { return nil }
+            var components = URLComponents()
+            components.scheme = "https"
+            components.host = "\(languageCode).wikipedia.org"
+            components.percentEncodedPath = "/wiki/\(encodedTitle)"
+            return components.url
         }
 
         private func claimString(property: String) -> String? {
@@ -296,13 +314,19 @@ private struct EntityResponse: Decodable {
 
 private enum JSONValue: Decodable {
     case string(String)
+    case number(Double)
+    case bool(Bool)
     case object([String: JSONValue])
+    case array([JSONValue])
     case null
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() { self = .null }
         else if let value = try? container.decode(String.self) { self = .string(value) }
+        else if let value = try? container.decode(Bool.self) { self = .bool(value) }
+        else if let value = try? container.decode(Double.self) { self = .number(value) }
+        else if let value = try? container.decode([JSONValue].self) { self = .array(value) }
         else { self = .object(try container.decode([String: JSONValue].self)) }
     }
 }

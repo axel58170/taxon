@@ -15,11 +15,15 @@ struct WikidataProviderTests {
         let resolution = try await provider(transport).resolve(query: #require(TaxonSearchQuery("wespendief")), languages: [dutch, english, french])
 
         guard case let .resolved(taxon) = resolution else { Issue.record("Expected a resolved taxon"); return }
-        #expect(taxon.wikidataID.rawValue == "Q25443")
+        #expect(taxon.wikidataID.rawValue == "Q170466")
         #expect(taxon.scientificName.value == "Pernis apivorus")
-        #expect(taxon.rank?.name == "species")
+        #expect(taxon.rank?.name == "species") // P105 fixture includes Wikidata's numeric-id field.
         #expect(taxon.preferredName(for: dutch)?.value == "Wespendief")
         #expect(taxon.wikipediaSitelinks.map(\.language) == [french, dutch])
+        #expect(taxon.wikipediaSitelinks.map(\.url.absoluteString) == [
+            "https://fr.wikipedia.org/wiki/Bondr%C3%A9e%20apivore",
+            "https://nl.wikipedia.org/wiki/Wespendief"
+        ])
         #expect(transport.userAgents.allSatisfy { $0 == "TaxonTests/1.0 (fixture)" })
     }
 

@@ -7,7 +7,7 @@ struct TaxonIntentFormattingTests {
     func makesEntity() {
         let entity = TaxonEntity(taxon: honeyBuzzard, preferredLanguages: [french, english])
 
-        #expect(entity.id == "Q25443")
+        #expect(entity.id == "Q170466")
         #expect(entity.localizedName == "Bondrée apivore")
         #expect(entity.scientificName == "Pernis apivorus")
     }
@@ -31,7 +31,7 @@ struct TaxonIntentFormattingTests {
 
         #expect(TaxonIntentFormatting.uniqueCandidateChoices(candidates).map(\.title) == [
             "Pernis apivorus · species",
-            "Pernis apivorus · species [Q25443]"
+            "Pernis apivorus · species [Q170466]"
         ])
     }
 
@@ -39,7 +39,7 @@ struct TaxonIntentFormattingTests {
     private let french = TaxonLanguage(rawValue: "fr")!
     private let honeyBuzzard = Taxon(
         identity: TaxonIdentity(
-            wikidataID: WikidataID(rawValue: "Q25443")!,
+            wikidataID: WikidataID(rawValue: "Q170466")!,
             scientificName: ScientificName("Pernis apivorus")!
         ),
         rank: TaxonomicRank("species"),

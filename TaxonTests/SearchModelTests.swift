@@ -15,7 +15,7 @@ struct SearchModelTests {
             Issue.record("Expected a resolved fixture taxon")
             return
         }
-        #expect(taxon.wikidataID.rawValue == "Q25443")
+        #expect(taxon.wikidataID.rawValue == "Q170466")
         #expect(taxon.scientificName.value == "Pernis apivorus")
     }
 
