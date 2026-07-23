@@ -1,0 +1,33 @@
+name: Taxon
+options:
+  bundleIdPrefix: com.taxon
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  Taxon:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.taxon.app
+        GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    scheme:
+      testTargets:
+        - TaxonTests
+  TaxonTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: TaxonTests
+    dependencies:
+      - target: Taxon
