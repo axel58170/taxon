@@ -67,7 +67,7 @@ The main app uses the live Wikidata provider. Package and app tests remain deter
 
 The Wikipedia-opening intent uses `OpenURLIntent`, which is available on iOS 18 and later. The rest of the app and intent surface retains the iOS 17 deployment target.
 
-The app, App Intents, and Share Extension share language settings through the `group.com.taxon.app` App Group. Device builds require an Apple Developer account and provisioning profiles for both `com.taxon.app` and `com.taxon.app.share` that include this App Group.
+The app, App Intents, and Share Extension share language settings through the `group.com.axelgraff.taxon` App Group. Device builds require an Apple Developer account and provisioning profiles for both `com.axelgraff.taxon` and `com.axelgraff.taxon.share` that include this App Group.
 
 ### Testing App Intents
 

@@ -9,6 +9,7 @@ struct SharedOutputSettingsStoreTests {
         withIsolatedDefaults { _, store in
             let snapshot = store.load()
 
+            #expect(SharedOutputSettingsStore.appGroupSuiteName == "group.com.axelgraff.taxon")
             #expect(snapshot.languages.map(\.rawValue) == ["en", "fr", "nl"])
             #expect(snapshot.scientificNamePosition == .last)
             #expect(snapshot.preferredWikipediaLanguage?.rawValue == "en")

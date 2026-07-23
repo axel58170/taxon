@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.taxon.app</string>
+		<string>group.com.axelgraff.taxon</string>
 	</array>
 </dict>
 </plist>

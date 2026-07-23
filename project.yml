@@ -31,7 +31,7 @@ targets:
         embed: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.taxon.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.axelgraff.taxon
         CODE_SIGN_ENTITLEMENTS: App/Taxon.entitlements
         GENERATE_INFOPLIST_FILE: YES
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -65,7 +65,7 @@ targets:
               NSExtensionActivationSupportsText: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.taxon.app.share
+        PRODUCT_BUNDLE_IDENTIFIER: com.axelgraff.taxon.share
         CODE_SIGN_ENTITLEMENTS: ShareExtension/TaxonShareExtension.entitlements
         APPLICATION_EXTENSION_API_ONLY: YES
         SKIP_INSTALL: YES

@@ -27,7 +27,7 @@ public struct OutputSettingsSnapshot: Codable, Hashable, Sendable {
 
 /// Synchronous `UserDefaults` persistence suitable for use by the app and extension processes.
 public struct SharedOutputSettingsStore: @unchecked Sendable {
-    public static let appGroupSuiteName = "group.com.taxon.app"
+    public static let appGroupSuiteName = "group.com.axelgraff.taxon"
     public static let defaultStorageKey = "output-settings-v1"
 
     private let userDefaults: UserDefaults
