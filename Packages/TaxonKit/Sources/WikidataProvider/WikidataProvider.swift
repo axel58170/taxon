@@ -238,7 +238,10 @@ private struct EntityResponse: Decodable {
             struct DataValue: Decodable { let value: JSONValue }
             let datavalue: DataValue?
         }
-        struct Claim: Decodable { let mainsnak: Snak }
+        struct Claim: Decodable {
+            let mainsnak: Snak
+            let rank: String?
+        }
         struct Sitelink: Decodable { let site: String; let title: String; let url: URL? }
 
         let labels: [String: LanguageValue]?
@@ -251,15 +254,42 @@ private struct EntityResponse: Decodable {
 
         func localizedNames(requestedLanguages: [TaxonLanguage]) -> [LocalizedTaxonName] {
             let languages = requestedLanguages.isEmpty ? [] : requestedLanguages
-            return languages.compactMap { language in
+            return languages.flatMap { language -> [LocalizedTaxonName] in
                 let code = language.baseLanguageCode
-                if let label = labels?[code]?.value {
-                    return LocalizedTaxonName(language: language, value: label, source: .wikidata, isPreferred: true)
+                let commonNameClaims = commonNames(languageCode: code)
+                let preferredClaims = commonNameClaims
+                    .filter { $0.rank == "preferred" }
+                    .map(\.value)
+                let normalClaims = commonNameClaims
+                    .filter { $0.rank != "preferred" }
+                    .map(\.value)
+                let label = labels?[code]?.value
+                let aliases = aliases?[code]?.map(\.value) ?? []
+
+                let orderedCandidates = preferredClaims
+                    + (label.map { [$0] } ?? [])
+                    + aliases
+                    + normalClaims
+
+                var seen = Set<String>()
+                let usableCandidates = orderedCandidates.filter { candidate in
+                    let normalized = TaxonSearchQuery.normalize(candidate)
+                    guard !normalized.isEmpty else { return false }
+                    if let scientificName,
+                       normalized == TaxonSearchQuery.normalize(scientificName) {
+                        return false
+                    }
+                    return seen.insert(normalized).inserted
                 }
-                if let alias = aliases?[code]?.first?.value {
-                    return LocalizedTaxonName(language: language, value: alias, source: .wikidata, isPreferred: false)
+
+                return usableCandidates.enumerated().compactMap { index, value in
+                    LocalizedTaxonName(
+                        language: language,
+                        value: value,
+                        source: .wikidata,
+                        isPreferred: index == 0
+                    )
                 }
-                return nil
             }
         }
 
@@ -308,6 +338,20 @@ private struct EntityResponse: Decodable {
                 if let identifier = WikidataID(rawValue: id) { return identifier }
             }
             return nil
+        }
+
+        private func commonNames(languageCode: String) -> [(value: String, rank: String)] {
+            (claims?["P1843"] ?? []).compactMap { claim in
+                guard claim.rank != "deprecated",
+                      case let .object(value) = claim.mainsnak.datavalue?.value,
+                      case let .string(text)? = value["text"],
+                      case let .string(language)? = value["language"],
+                      TaxonLanguage(rawValue: language)?.baseLanguageCode == languageCode
+                else {
+                    return nil
+                }
+                return (text, claim.rank ?? "normal")
+            }
         }
     }
 }

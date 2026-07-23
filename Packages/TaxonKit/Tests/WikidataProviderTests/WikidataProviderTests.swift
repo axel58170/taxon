@@ -8,6 +8,7 @@ struct WikidataProviderTests {
     private let english = TaxonLanguage(rawValue: "en")!
     private let dutch = TaxonLanguage(rawValue: "nl")!
     private let french = TaxonLanguage(rawValue: "fr")!
+    private let italian = TaxonLanguage(rawValue: "it")!
 
     @Test("Wespendief resolves through search, taxon gate, and entity hydration")
     func resolvesWespendief() async throws {
@@ -64,6 +65,29 @@ struct WikidataProviderTests {
         #expect(taxon.preferredName(for: TaxonLanguage(rawValue: "de")!) == nil)
     }
 
+    @Test("A scientific Italian label does not hide the Common swift vernacular alias")
+    func rejectsScientificEquivalentLabel() async throws {
+        let taxon = try #require(await commonSwift(languages: [italian]))
+
+        #expect(taxon.scientificName.value == "Apus apus")
+        #expect(taxon.preferredName(for: italian)?.value == "Rondone")
+    }
+
+    @Test("A regional Italian request falls back to the base-language vernacular name")
+    func fallsBackFromRegionalItalian() async throws {
+        let regionalItalian = try #require(TaxonLanguage(rawValue: "it-IT"))
+        let taxon = try #require(await commonSwift(languages: [regionalItalian]))
+
+        #expect(taxon.preferredName(for: regionalItalian)?.value == "Rondone")
+    }
+
+    @Test("P1843 supplies a common name when labels and aliases are only scientific")
+    func fallsBackToTaxonCommonNameClaim() async throws {
+        let taxon = try #require(await commonSwift(languages: [english]))
+
+        #expect(taxon.preferredName(for: english)?.value == "Common swift")
+    }
+
     @Test("A non-taxon search result is rejected by the SPARQL gate")
     func rejectsNonTaxon() async throws {
         let resolution = try await provider(FixtureTransport(search: "search-non-taxon", gate: "gate-empty", entities: "entities-honey-buzzard"))
@@ -88,6 +112,16 @@ struct WikidataProviderTests {
                 userAgent: "TaxonTests/1.0 (fixture)"
             )
         )
+    }
+
+    private func commonSwift(languages: [TaxonLanguage]) async throws -> Taxon? {
+        try await provider(
+            FixtureTransport(
+                search: "search-scientific",
+                gate: "gate-common-swift",
+                entities: "entities-common-swift"
+            )
+        ).taxon(for: WikidataID(rawValue: "Q25377")!, languages: languages)
     }
 }
 
