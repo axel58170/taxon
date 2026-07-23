@@ -61,7 +61,12 @@ public struct TaxonLanguage: RawRepresentable, Codable, Hashable, Sendable, Comp
 
     public init?(rawValue: String) {
         let normalized = Self.normalize(rawValue)
-        guard !normalized.isEmpty else { return nil }
+        guard
+            let baseCode = normalized.split(separator: "-", maxSplits: 1).first.map(String.init),
+            Self.isoLanguageCodes.contains(baseCode)
+        else {
+            return nil
+        }
         self.rawValue = normalized
     }
 
@@ -78,8 +83,23 @@ public struct TaxonLanguage: RawRepresentable, Codable, Hashable, Sendable, Comp
             .replacingOccurrences(of: "_", with: "-")
             .split(separator: "-", omittingEmptySubsequences: true)
         guard let first = pieces.first else { return "" }
-        return ([String(first).lowercased()] + pieces.dropFirst().map { String($0) }).joined(separator: "-")
+        let subtags = pieces.dropFirst().map { piece -> String in
+            let value = String(piece)
+            if value.count == 4, value.allSatisfy(\.isLetter) {
+                return value.prefix(1).uppercased() + value.dropFirst().lowercased()
+            }
+            if (value.count == 2 && value.allSatisfy(\.isLetter))
+                || (value.count == 3 && value.allSatisfy(\.isNumber)) {
+                return value.uppercased()
+            }
+            return value.lowercased()
+        }
+        return ([String(first).lowercased()] + subtags).joined(separator: "-")
     }
+
+    private static let isoLanguageCodes = Set(
+        Locale.LanguageCode.isoLanguageCodes.map { $0.identifier.lowercased() }
+    )
 }
 
 /// A user-facing name for a taxon. It is not an alternate identity for the taxon.

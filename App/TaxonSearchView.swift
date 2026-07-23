@@ -219,7 +219,7 @@ private struct NameRow: View {
         switch row {
         case .scientific: return "Scientific"
         case let .localized(language, _):
-            return Locale.current.localizedString(forLanguageCode: language.baseLanguageCode) ?? language.rawValue
+            return TaxonLanguagePresentation.displayName(for: language)
         }
     }
 
@@ -269,7 +269,7 @@ private struct OutputLanguageSettings: View {
             List {
                 Section("Languages") {
                     ForEach(model.configuredLanguages) { language in
-                        Text(Locale.current.localizedString(forLanguageCode: language.baseLanguageCode) ?? language.rawValue)
+                        Text(TaxonLanguagePresentation.displayName(for: language))
                     }
                     .onDelete(perform: model.removeLanguages)
                     .onMove(perform: model.moveLanguages)
@@ -279,10 +279,16 @@ private struct OutputLanguageSettings: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                         Button("Add") {
-                            model.addLanguage(code: languageCode)
-                            languageCode = ""
+                            Task {
+                                if await model.addLanguage(input: languageCode) {
+                                    languageCode = ""
+                                }
+                            }
                         }
-                        .disabled(TaxonLanguage(rawValue: languageCode) == nil)
+                        .disabled(
+                            TaxonLanguagePresentation.language(from: languageCode)
+                                .map(model.configuredLanguages.contains) != false
+                        )
                     }
                 }
 
@@ -298,7 +304,7 @@ private struct OutputLanguageSettings: View {
                     Picker("Preferred language", selection: $model.preferredWikipediaLanguage) {
                         Text("Configured fallback").tag(TaxonLanguage?.none)
                         ForEach(model.configuredLanguages) { language in
-                            Text(Locale.current.localizedString(forLanguageCode: language.baseLanguageCode) ?? language.rawValue)
+                            Text(TaxonLanguagePresentation.displayName(for: language))
                                 .tag(Optional(language))
                         }
                     }

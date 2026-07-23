@@ -110,9 +110,29 @@ final class SearchModel {
         state = .resolved(candidate.taxon)
     }
 
-    func addLanguage(code: String) {
-        guard let language = TaxonLanguage(rawValue: code), !configuredLanguages.contains(language) else { return }
+    @discardableResult
+    func addLanguage(input: String) async -> Bool {
+        guard
+            let language = TaxonLanguagePresentation.language(from: input),
+            !configuredLanguages.contains(language)
+        else {
+            return false
+        }
         configuredLanguages.append(language)
+
+        guard case let .resolved(taxon) = state else { return true }
+        do {
+            if let refreshed = try await resolver.taxon(
+                for: taxon.wikidataID,
+                languages: configuredLanguages
+            ) {
+                state = .resolved(refreshed)
+            }
+        } catch {
+            // Keep the existing result visible. A later lookup can retry the
+            // newly configured language without discarding useful data.
+        }
+        return true
     }
 
     func removeLanguages(at offsets: IndexSet) {

@@ -21,6 +21,13 @@ struct TaxonDomainTests {
         #expect(TaxonSearchQuery(" \n\t ") == nil)
     }
 
+    @Test("Language values accept codes, not localized display names")
+    func validatesLanguageCodes() {
+        #expect(TaxonLanguage(rawValue: "Italian") == nil)
+        #expect(TaxonLanguage(rawValue: "it_IT")?.rawValue == "it-IT")
+        #expect(TaxonLanguage(rawValue: "IT_it")?.rawValue == "it-IT")
+    }
+
     @Test("Configured ordering preserves a missing language row and the scientific position")
     func createsOutputRows() {
         let taxon = makeTaxon(names: [
