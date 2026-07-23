@@ -9,10 +9,17 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .library(name: "TaxonDomain", targets: ["TaxonDomain"])
+        .library(name: "TaxonDomain", targets: ["TaxonDomain"]),
+        .library(name: "WikidataProvider", targets: ["WikidataProvider"])
     ],
     targets: [
         .target(name: "TaxonDomain"),
-        .testTarget(name: "TaxonDomainTests", dependencies: ["TaxonDomain"])
+        .target(name: "WikidataProvider", dependencies: ["TaxonDomain"]),
+        .testTarget(name: "TaxonDomainTests", dependencies: ["TaxonDomain"]),
+        .testTarget(
+            name: "WikidataProviderTests",
+            dependencies: ["WikidataProvider"],
+            resources: [.process("Fixtures")]
+        )
     ]
 )
