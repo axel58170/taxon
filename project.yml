@@ -8,12 +8,20 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
+packages:
+  TaxonKit:
+    path: Packages/TaxonKit
 targets:
   Taxon:
     type: application
     platform: iOS
     sources:
       - path: App
+    dependencies:
+      - package: TaxonKit
+        product: TaxonDomain
+      - package: TaxonKit
+        product: WikidataProvider
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.taxon.app
@@ -27,6 +35,9 @@ targets:
   TaxonTests:
     type: bundle.unit-test
     platform: iOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
     sources:
       - path: TaxonTests
     dependencies:

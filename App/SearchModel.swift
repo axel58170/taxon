@@ -1,0 +1,127 @@
+import Foundation
+import Observation
+import TaxonDomain
+
+@MainActor
+@Observable
+final class SearchModel {
+    enum State: Equatable {
+        case idle
+        case loading
+        case candidates([TaxonCandidate])
+        case resolved(Taxon)
+        case noMatch
+        case failed(String)
+    }
+
+    var queryText = ""
+    var state: State = .idle
+    var configuredLanguages: [TaxonLanguage]
+    var scientificNamePosition: ScientificNamePosition
+    var preferredWikipediaLanguage: TaxonLanguage?
+
+    private let resolver: any TaxonResolving
+    private var searchTask: Task<Void, Never>?
+
+    init(
+        resolver: any TaxonResolving,
+        configuredLanguages: [TaxonLanguage] = [
+            TaxonLanguage(rawValue: "en")!,
+            TaxonLanguage(rawValue: "fr")!,
+            TaxonLanguage(rawValue: "nl")!
+        ],
+        scientificNamePosition: ScientificNamePosition = .last,
+        preferredWikipediaLanguage: TaxonLanguage? = TaxonLanguage(rawValue: "en")
+    ) {
+        self.resolver = resolver
+        self.configuredLanguages = configuredLanguages
+        self.scientificNamePosition = scientificNamePosition
+        self.preferredWikipediaLanguage = preferredWikipediaLanguage
+    }
+
+    var outputConfiguration: OutputLanguageConfiguration {
+        OutputLanguageConfiguration(
+            languages: configuredLanguages,
+            scientificNamePosition: scientificNamePosition
+        )
+    }
+
+    func searchTextDidChange() {
+        searchTask?.cancel()
+        guard let query = TaxonSearchQuery(queryText) else {
+            state = .idle
+            return
+        }
+
+        state = .loading
+        searchTask = Task { [weak self, resolver, configuredLanguages] in
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+                let resolution = try await resolver.resolve(query: query, languages: configuredLanguages)
+                guard !Task.isCancelled else { return }
+                self?.apply(resolution)
+            } catch is CancellationError {
+                // A newer query superseded this lookup.
+            } catch let error as TaxonResolutionError {
+                guard !Task.isCancelled else { return }
+                self?.state = .failed(Self.message(for: error))
+            } catch {
+                guard !Task.isCancelled else { return }
+                self?.state = .failed("Taxon lookup could not be completed.")
+            }
+        }
+    }
+
+    func resolveImmediately(_ text: String) async {
+        searchTask?.cancel()
+        queryText = text
+        guard let query = TaxonSearchQuery(text) else {
+            state = .idle
+            return
+        }
+        state = .loading
+        do {
+            apply(try await resolver.resolve(query: query, languages: configuredLanguages))
+        } catch let error as TaxonResolutionError {
+            state = .failed(Self.message(for: error))
+        } catch {
+            state = .failed("Taxon lookup could not be completed.")
+        }
+    }
+
+    func select(_ candidate: TaxonCandidate) {
+        searchTask?.cancel()
+        state = .resolved(candidate.taxon)
+    }
+
+    func addLanguage(code: String) {
+        guard let language = TaxonLanguage(rawValue: code), !configuredLanguages.contains(language) else { return }
+        configuredLanguages.append(language)
+    }
+
+    func removeLanguages(at offsets: IndexSet) {
+        configuredLanguages.remove(atOffsets: offsets)
+    }
+
+    func moveLanguages(from source: IndexSet, to destination: Int) {
+        configuredLanguages.move(fromOffsets: source, toOffset: destination)
+    }
+
+    private func apply(_ resolution: TaxonResolution) {
+        switch resolution {
+        case let .resolved(taxon): state = .resolved(taxon)
+        case let .candidates(candidates): state = .candidates(candidates)
+        case .noMatch: state = .noMatch
+        }
+    }
+
+    private static func message(for error: TaxonResolutionError) -> String {
+        switch error {
+        case .networkUnavailable: return "No network connection is available."
+        case .rateLimited: return "The naming source asked us to try again shortly."
+        case .temporaryServerFailure: return "The naming source is temporarily unavailable."
+        case .invalidProviderResponse: return "The naming source returned an unreadable response."
+        }
+    }
+}
