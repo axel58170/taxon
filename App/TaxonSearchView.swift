@@ -33,6 +33,9 @@ struct TaxonSearchView: View {
             }
             .searchable(text: $model.queryText, prompt: "Common or scientific name")
             .onChange(of: model.queryText) { _, _ in model.searchTextDidChange() }
+            .onSubmit(of: .search) {
+                Task { await model.resolveImmediately(model.queryText) }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Output languages", systemImage: "slider.horizontal.3") {

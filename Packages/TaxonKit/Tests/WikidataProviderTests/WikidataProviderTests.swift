@@ -115,6 +115,29 @@ struct WikidataProviderTests {
         #expect(resolution == .noMatch)
     }
 
+    @Test("Taxon validation overlaps the SPARQL gate and entity hydration")
+    func overlapsGateAndEntityHydration() async throws {
+        let overlapBarrier = RequestOverlapBarrier()
+        let transport = FixtureTransport(
+            search: "search-wespendief",
+            gate: "gate-honey-buzzard",
+            entities: "entities-honey-buzzard",
+            overlapBarrier: overlapBarrier
+        )
+
+        let resolution = try await provider(transport).resolve(
+            query: #require(TaxonSearchQuery("wespendief")),
+            languages: [dutch]
+        )
+
+        guard case .resolved = resolution else {
+            Issue.record("Expected fixture resolution")
+            return
+        }
+        #expect(overlapBarrier.startedRequestKinds == Set(["gate", "entities"]))
+        #expect(overlapBarrier.releasedAfterBothStarted)
+    }
+
     @Test("Rate limiting preserves Retry-After")
     func mapsRateLimit() async throws {
         let transport = FixtureTransport(search: "search-wespendief", gate: "gate-honey-buzzard", entities: "entities-honey-buzzard", statusCode: 429, retryAfter: "12")
@@ -162,23 +185,32 @@ private final class FixtureTransport: @unchecked Sendable {
     private let fixtures: [String: Data]
     private let statusCode: Int
     private let retryAfter: String?
+    private let overlapBarrier: RequestOverlapBarrier?
     private let lock = NSLock()
     private(set) var userAgents: [String] = []
 
-    init(search: String, gate: String, entities: String, statusCode: Int = 200, retryAfter: String? = nil) {
+    init(
+        search: String,
+        gate: String,
+        entities: String,
+        statusCode: Int = 200,
+        retryAfter: String? = nil,
+        overlapBarrier: RequestOverlapBarrier? = nil
+    ) {
         let identifier = UUID().uuidString.lowercased()
         self.actionAPIBaseURL = URL(string: "https://action-\(identifier).fixture/w/api.php")!
         self.queryServiceURL = URL(string: "https://query-\(identifier).fixture/sparql")!
         self.fixtures = ["search": fixture(search), "gate": fixture(gate), "entities": fixture(entities)]
         self.statusCode = statusCode
         self.retryAfter = retryAfter
+        self.overlapBarrier = overlapBarrier
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [FixtureURLProtocol.self]
         self.session = URLSession(configuration: configuration)
         FixtureURLProtocol.install(transport: self)
     }
 
-    fileprivate func response(for request: URLRequest) -> (HTTPURLResponse, Data) {
+    fileprivate func response(for request: URLRequest) -> (kind: String, response: HTTPURLResponse, data: Data) {
         lock.lock()
         userAgents.append(request.value(forHTTPHeaderField: "User-Agent") ?? "")
         lock.unlock()
@@ -186,7 +218,15 @@ private final class FixtureTransport: @unchecked Sendable {
         var headers = [String: String]()
         if let retryAfter { headers["Retry-After"] = retryAfter }
         let response = HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: headers)!
-        return (response, fixtures[key]!)
+        return (key, response, fixtures[key]!)
+    }
+
+    fileprivate func deliverWhenReady(kind: String, _ delivery: @escaping () -> Void) {
+        guard let overlapBarrier, kind == "gate" || kind == "entities" else {
+            delivery()
+            return
+        }
+        overlapBarrier.arrive(kind: kind, delivery: delivery)
     }
 }
 
@@ -203,13 +243,60 @@ private final class FixtureURLProtocol: URLProtocol {
     override func startLoading() {
         let activeTransport = request.url?.host.flatMap(Self.registry.transport(forHost:))
         guard let activeTransport else { return }
-        let (response, data) = activeTransport.response(for: request)
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: data)
-        client?.urlProtocolDidFinishLoading(self)
+        let result = activeTransport.response(for: request)
+        activeTransport.deliverWhenReady(kind: result.kind) { [weak self] in
+            guard let self else { return }
+            self.client?.urlProtocol(self, didReceive: result.response, cacheStoragePolicy: .notAllowed)
+            self.client?.urlProtocol(self, didLoad: result.data)
+            self.client?.urlProtocolDidFinishLoading(self)
+        }
     }
 
     override func stopLoading() {}
+}
+
+private final class RequestOverlapBarrier: @unchecked Sendable {
+    private let lock = NSLock()
+    private var deliveries: [String: () -> Void] = [:]
+    private var started = Set<String>()
+    private var didReleaseAfterBothStarted = false
+
+    var startedRequestKinds: Set<String> {
+        lock.withLock { started }
+    }
+
+    var releasedAfterBothStarted: Bool {
+        lock.withLock { didReleaseAfterBothStarted }
+    }
+
+    func arrive(kind: String, delivery: @escaping () -> Void) {
+        let (pending, needsFallback): ([() -> Void], Bool) = lock.withLock {
+            started.insert(kind)
+            deliveries[kind] = delivery
+            guard deliveries.keys.contains("gate"), deliveries.keys.contains("entities") else {
+                return ([], deliveries.count == 1)
+            }
+            didReleaseAfterBothStarted = true
+            let pending = Array(deliveries.values)
+            deliveries.removeAll()
+            return (pending, false)
+        }
+        pending.forEach { $0() }
+        if needsFallback {
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(500)) { [weak self] in
+                self?.releasePending()
+            }
+        }
+    }
+
+    private func releasePending() {
+        let pending: [() -> Void] = lock.withLock {
+            let pending = Array(deliveries.values)
+            deliveries.removeAll()
+            return pending
+        }
+        pending.forEach { $0() }
+    }
 }
 
 private final class FixtureTransportRegistry: @unchecked Sendable {

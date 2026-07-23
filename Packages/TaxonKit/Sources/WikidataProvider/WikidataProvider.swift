@@ -59,16 +59,15 @@ public struct WikidataProvider: TaxonResolving, Sendable {
         }
 
         guard !candidateIDs.isEmpty else { return .noMatch }
-        let gates = try await taxonGates(for: candidateIDs)
-        guard !gates.isEmpty else { return .noMatch }
-        let taxa = try await hydrate(ids: gates.map(\.id), languages: languages, gates: gates)
+        let taxa = try await validatedTaxa(
+            ids: candidateIDs,
+            languages: languages
+        )
         return resolution(for: taxa, query: query)
     }
 
     public func taxon(for wikidataID: WikidataID, languages: [TaxonLanguage]) async throws -> Taxon? {
-        let gates = try await taxonGates(for: [wikidataID])
-        guard !gates.isEmpty else { return nil }
-        return try await hydrate(ids: [wikidataID], languages: languages, gates: gates).first
+        try await validatedTaxa(ids: [wikidataID], languages: languages).first
     }
 
     private func resolution(for taxa: [Taxon], query: TaxonSearchQuery) -> TaxonResolution {
@@ -126,9 +125,24 @@ public struct WikidataProvider: TaxonResolving, Sendable {
         return ids.compactMap { gatesByID[$0] }
     }
 
-    private func hydrate(ids: [WikidataID], languages: [TaxonLanguage], gates: [TaxonGate]) async throws -> [Taxon] {
+    private func validatedTaxa(
+        ids: [WikidataID],
+        languages: [TaxonLanguage]
+    ) async throws -> [Taxon] {
+        async let pendingGates = taxonGates(for: ids)
+        async let pendingEntities = entities(for: ids, languages: languages)
+        let (gates, response) = try await (pendingGates, pendingEntities)
+        guard !gates.isEmpty else { return [] }
+
+        return mapEntities(response, ids: ids, languages: languages, gates: gates)
+    }
+
+    private func entities(
+        for ids: [WikidataID],
+        languages: [TaxonLanguage]
+    ) async throws -> EntityResponse {
         let languageCodes = orderedSearchLanguages(languages).map(\.baseLanguageCode).joined(separator: "|")
-        let response: EntityResponse = try await request(
+        return try await request(
             actionURL(parameters: [
                 "action": "wbgetentities",
                 "ids": ids.map(\.rawValue).joined(separator: "|"),
@@ -137,6 +151,14 @@ public struct WikidataProvider: TaxonResolving, Sendable {
                 "format": "json"
             ])
         )
+    }
+
+    private func mapEntities(
+        _ response: EntityResponse,
+        ids: [WikidataID],
+        languages: [TaxonLanguage],
+        gates: [TaxonGate]
+    ) -> [Taxon] {
         let gatesByID = Dictionary(uniqueKeysWithValues: gates.map { ($0.id, $0) })
         return ids.compactMap { id in
             guard let entity = response.entities[id.rawValue], let gate = gatesByID[id],

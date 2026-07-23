@@ -68,11 +68,11 @@ final class SearchModel {
             return
         }
 
-        state = .loading
         searchTask = Task { [weak self, resolver, configuredLanguages] in
             do {
                 try await Task.sleep(for: .milliseconds(300))
                 guard !Task.isCancelled else { return }
+                self?.state = .loading
                 let resolution = try await resolver.resolve(query: query, languages: configuredLanguages)
                 guard !Task.isCancelled else { return }
                 self?.apply(resolution)

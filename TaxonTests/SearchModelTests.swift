@@ -60,7 +60,8 @@ struct SearchModelTests {
 
     @Test("Search dismissal preserves a result until a new query begins")
     func preservesResolvedStateWhenSearchDismissalClearsQuery() async {
-        let model = SearchModel(resolver: MockTaxonResolver())
+        let resolver = SuspendedSearchResolver()
+        let model = SearchModel(resolver: resolver)
 
         await model.resolveImmediately("Bondrée apivore")
         guard case .resolved = model.state else {
@@ -77,7 +78,18 @@ struct SearchModelTests {
 
         model.queryText = "Passer"
         model.searchTextDidChange()
+        guard case .resolved = model.state else {
+            Issue.record("Expected the previous result to remain stable during debounce")
+            return
+        }
+
+        await waitUntil { model.state == .loading }
         #expect(model.state == .loading)
+        #expect(await resolver.pendingQuery() == "Passer")
+
+        await resolver.resume(with: .noMatch)
+        await waitUntil { model.state == .noMatch }
+        #expect(model.state == .noMatch)
     }
 
     @Test("Output language edits preserve order and ignore duplicates")
@@ -140,6 +152,49 @@ struct SearchModelTests {
             return
         }
         #expect(taxon.preferredName(for: TaxonLanguage(rawValue: "it")!)?.value == "Farnia")
+    }
+
+    private func waitUntil(
+        timeout: Duration = .seconds(1),
+        condition: @MainActor () -> Bool
+    ) async {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: timeout)
+        while !condition(), clock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+}
+
+private actor SuspendedSearchResolver: TaxonResolving {
+    private var pending: (query: String, continuation: CheckedContinuation<TaxonResolution, Never>)?
+
+    func resolve(
+        query: TaxonSearchQuery,
+        languages: [TaxonLanguage]
+    ) async throws -> TaxonResolution {
+        if query.originalText == "Bondrée apivore" {
+            return try await MockTaxonResolver().resolve(query: query, languages: languages)
+        }
+        return await withCheckedContinuation { continuation in
+            pending = (query.originalText, continuation)
+        }
+    }
+
+    func taxon(
+        for wikidataID: WikidataID,
+        languages: [TaxonLanguage]
+    ) async throws -> Taxon? {
+        nil
+    }
+
+    func pendingQuery() -> String? {
+        pending?.query
+    }
+
+    func resume(with resolution: TaxonResolution) {
+        pending?.continuation.resume(returning: resolution)
+        pending = nil
     }
 }
 
