@@ -32,6 +32,9 @@ struct TaxonSearchView: View {
                 }
             }
             .navigationTitle("Taxon")
+            .background {
+                SearchDismissObserver(shouldDismiss: isShowingResolvedTaxon)
+            }
             .searchable(text: $model.queryText, prompt: "Common or scientific name")
             .onChange(of: model.queryText) { _, _ in model.searchTextDidChange() }
             .toolbar {
@@ -46,6 +49,28 @@ struct TaxonSearchView: View {
                 OutputLanguageSettings(model: model)
             }
         }
+    }
+
+    private var isShowingResolvedTaxon: Bool {
+        if case .resolved = model.state { return true }
+        return false
+    }
+}
+
+/// Must be a descendant of `.searchable` so SwiftUI supplies its active dismiss action.
+private struct SearchDismissObserver: View {
+    @Environment(\.dismissSearch) private var dismissSearch
+    let shouldDismiss: Bool
+
+    var body: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .onChange(of: shouldDismiss, initial: true) { _, shouldDismiss in
+                if shouldDismiss {
+                    dismissSearch()
+                }
+            }
+            .accessibilityHidden(true)
     }
 }
 
@@ -87,8 +112,13 @@ private struct TaxonResultView: View {
         List {
             if let rank = taxon.rank {
                 Section {
-                    LabeledContent("Rank", value: rank.name.capitalized)
-                    LabeledContent("Wikidata", value: taxon.wikidataID.rawValue)
+                    HStack(spacing: 12) {
+                        Label(rank.name.capitalized, systemImage: "point.3.connected.trianglepath.dotted")
+                        Spacer(minLength: 8)
+                        Text(taxon.wikidataID.rawValue)
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.subheadline)
                 }
             }
 
@@ -110,6 +140,9 @@ private struct TaxonResultView: View {
                 }
             }
         }
+        .listSectionSpacing(.compact)
+        .environment(\.defaultMinListRowHeight, 40)
+        .contentMargins(.top, 4, for: .scrollContent)
         .navigationTitle(taxon.scientificName.value)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -153,6 +186,7 @@ private struct NameRow: View {
                     .accessibilityLabel("\(label) name not available")
             }
         }
+        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
 
     private var isScientific: Bool {
