@@ -11,17 +11,20 @@ public struct WikidataProvider: TaxonResolving, Sendable {
         public var queryServiceURL: URL
         public var userAgent: String
         public var candidateLimit: Int
+        public var maxConcurrentSearches: Int
 
         public init(
             actionAPIBaseURL: URL = URL(string: "https://www.wikidata.org/w/api.php")!,
             queryServiceURL: URL = URL(string: "https://query.wikidata.org/sparql")!,
             userAgent: String = "Taxon/0.1 (https://github.com/axel58170/taxon)",
-            candidateLimit: Int = 20
+            candidateLimit: Int = 20,
+            maxConcurrentSearches: Int = 4
         ) {
             self.actionAPIBaseURL = actionAPIBaseURL
             self.queryServiceURL = queryServiceURL
             self.userAgent = userAgent
             self.candidateLimit = min(max(candidateLimit, 1), 50)
+            self.maxConcurrentSearches = min(max(maxConcurrentSearches, 1), 8)
         }
     }
 
@@ -35,22 +38,18 @@ public struct WikidataProvider: TaxonResolving, Sendable {
 
     public func resolve(query: TaxonSearchQuery, languages: [TaxonLanguage]) async throws -> TaxonResolution {
         let searchLanguages = orderedSearchLanguages(languages)
+        let searchResults = try await searchCandidateIDs(
+            query: query,
+            languages: searchLanguages
+        )
         var candidateIDs: [WikidataID] = []
         var seen = Set<WikidataID>()
 
-        search: for language in searchLanguages {
-            let response: SearchResponse = try await request(
-                actionURL(parameters: [
-                    "action": "wbsearchentities",
-                    "search": query.originalText,
-                    "language": language.baseLanguageCode,
-                    "type": "item",
-                    "limit": String(configuration.candidateLimit),
-                    "format": "json"
-                ])
-            )
-            for result in response.search {
-                guard let id = WikidataID(rawValue: result.id), seen.insert(id).inserted else { continue }
+        let longestResultCount = searchResults.map(\.count).max() ?? 0
+        search: for resultIndex in 0..<longestResultCount {
+            for results in searchResults where results.indices.contains(resultIndex) {
+                let id = results[resultIndex]
+                guard seen.insert(id).inserted else { continue }
                 candidateIDs.append(id)
                 if candidateIDs.count == configuration.candidateLimit {
                     break search
@@ -64,6 +63,51 @@ public struct WikidataProvider: TaxonResolving, Sendable {
             languages: languages
         )
         return resolution(for: taxa, query: query)
+    }
+
+    private func searchCandidateIDs(
+        query: TaxonSearchQuery,
+        languages: [TaxonLanguage]
+    ) async throws -> [[WikidataID]] {
+        try await withThrowingTaskGroup(
+            of: (Int, [WikidataID]).self,
+            returning: [[WikidataID]].self
+        ) { group in
+            func addSearch(at index: Int) {
+                let language = languages[index]
+                group.addTask {
+                    let response: SearchResponse = try await request(
+                        actionURL(parameters: [
+                            "action": "wbsearchentities",
+                            "search": query.originalText,
+                            "language": language.baseLanguageCode,
+                            "type": "item",
+                            "limit": String(configuration.candidateLimit),
+                            "format": "json"
+                        ])
+                    )
+                    return (
+                        index,
+                        response.search.compactMap { WikidataID(rawValue: $0.id) }
+                    )
+                }
+            }
+
+            var ordered = Array(repeating: [WikidataID](), count: languages.count)
+            var nextIndex = 0
+            while nextIndex < min(configuration.maxConcurrentSearches, languages.count) {
+                addSearch(at: nextIndex)
+                nextIndex += 1
+            }
+            for try await (index, ids) in group {
+                ordered[index] = ids
+                if nextIndex < languages.count {
+                    addSearch(at: nextIndex)
+                    nextIndex += 1
+                }
+            }
+            return ordered
+        }
     }
 
     public func taxon(for wikidataID: WikidataID, languages: [TaxonLanguage]) async throws -> Taxon? {
@@ -236,8 +280,8 @@ private struct TaxonGate: Sendable {
     let rank: TaxonomicRank?
 }
 
-private struct SearchResponse: Decodable {
-    struct Result: Decodable { let id: String }
+private struct SearchResponse: Decodable, Sendable {
+    struct Result: Decodable, Sendable { let id: String }
     let search: [Result]
 }
 

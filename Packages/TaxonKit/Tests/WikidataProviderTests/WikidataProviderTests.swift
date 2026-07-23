@@ -138,6 +138,83 @@ struct WikidataProviderTests {
         #expect(overlapBarrier.releasedAfterBothStarted)
     }
 
+    @Test("Configured-language searches overlap")
+    func overlapsConfiguredLanguageSearches() async throws {
+        let searchCoordinator = SearchRequestCoordinator(
+            expectedLanguages: ["en", "fr"],
+            releaseOrder: ["en", "fr"]
+        )
+        let transport = FixtureTransport(
+            search: "search-ambiguous",
+            gate: "gate-ambiguous",
+            entities: "entities-ambiguous",
+            searchCoordinator: searchCoordinator
+        )
+
+        _ = try await provider(transport).resolve(
+            query: #require(TaxonSearchQuery("Common Swift")),
+            languages: [english, french]
+        )
+
+        #expect(searchCoordinator.startedLanguages == Set(["en", "fr"]))
+        #expect(searchCoordinator.releasedAfterAllStarted)
+    }
+
+    @Test("Candidate merging preserves configured-language order")
+    func preservesLanguageOrderWhenSearchesCompleteOutOfOrder() async throws {
+        let searchCoordinator = SearchRequestCoordinator(
+            expectedLanguages: ["en", "fr"],
+            releaseOrder: ["fr", "en"]
+        )
+        let transport = FixtureTransport(
+            search: "search-ambiguous",
+            gate: "gate-ambiguous",
+            entities: "entities-ambiguous",
+            searchByLanguage: [
+                "en": "search-q100",
+                "fr": "search-q200"
+            ],
+            searchCoordinator: searchCoordinator
+        )
+
+        let resolution = try await provider(transport, candidateLimit: 1).resolve(
+            query: #require(TaxonSearchQuery("Common Swift")),
+            languages: [english, french]
+        )
+
+        guard case let .resolved(taxon) = resolution else {
+            Issue.record("Expected the first configured language's candidate")
+            return
+        }
+        #expect(searchCoordinator.deliveredLanguages == ["fr", "en"])
+        #expect(taxon.wikidataID.rawValue == "Q100")
+    }
+
+    @Test("Candidate interleaving retains an exact match from a later language")
+    func interleavesCandidatesAcrossConfiguredLanguages() async throws {
+        let transport = FixtureTransport(
+            search: "search-ambiguous",
+            gate: "gate-honey-buzzard",
+            entities: "entities-honey-buzzard",
+            searchByLanguage: [
+                "en": "search-ambiguous",
+                "nl": "search-wespendief"
+            ]
+        )
+
+        let resolution = try await provider(transport, candidateLimit: 2).resolve(
+            query: #require(TaxonSearchQuery("wespendief")),
+            languages: [english, dutch]
+        )
+
+        guard case let .resolved(taxon) = resolution else {
+            Issue.record("Expected the interleaved Dutch candidate to resolve")
+            return
+        }
+        #expect(taxon.wikidataID.rawValue == "Q170466")
+        #expect(taxon.preferredName(for: dutch)?.value == "Wespendief")
+    }
+
     @Test("Rate limiting preserves Retry-After")
     func mapsRateLimit() async throws {
         let transport = FixtureTransport(search: "search-wespendief", gate: "gate-honey-buzzard", entities: "entities-honey-buzzard", statusCode: 429, retryAfter: "12")
@@ -146,13 +223,17 @@ struct WikidataProviderTests {
         }
     }
 
-    private func provider(_ transport: FixtureTransport) -> WikidataProvider {
+    private func provider(
+        _ transport: FixtureTransport,
+        candidateLimit: Int = 20
+    ) -> WikidataProvider {
         WikidataProvider(
             session: transport.session,
             configuration: .init(
                 actionAPIBaseURL: transport.actionAPIBaseURL,
                 queryServiceURL: transport.queryServiceURL,
-                userAgent: "TaxonTests/1.0 (fixture)"
+                userAgent: "TaxonTests/1.0 (fixture)",
+                candidateLimit: candidateLimit
             )
         )
     }
@@ -186,6 +267,7 @@ private final class FixtureTransport: @unchecked Sendable {
     private let statusCode: Int
     private let retryAfter: String?
     private let overlapBarrier: RequestOverlapBarrier?
+    private let searchCoordinator: SearchRequestCoordinator?
     private let lock = NSLock()
     private(set) var userAgents: [String] = []
 
@@ -195,33 +277,54 @@ private final class FixtureTransport: @unchecked Sendable {
         entities: String,
         statusCode: Int = 200,
         retryAfter: String? = nil,
-        overlapBarrier: RequestOverlapBarrier? = nil
+        overlapBarrier: RequestOverlapBarrier? = nil,
+        searchByLanguage: [String: String] = [:],
+        searchCoordinator: SearchRequestCoordinator? = nil
     ) {
         let identifier = UUID().uuidString.lowercased()
         self.actionAPIBaseURL = URL(string: "https://action-\(identifier).fixture/w/api.php")!
         self.queryServiceURL = URL(string: "https://query-\(identifier).fixture/sparql")!
-        self.fixtures = ["search": fixture(search), "gate": fixture(gate), "entities": fixture(entities)]
+        var fixtures = ["search": fixture(search), "gate": fixture(gate), "entities": fixture(entities)]
+        for (language, fixtureName) in searchByLanguage {
+            fixtures["search-\(language)"] = fixture(fixtureName)
+        }
+        self.fixtures = fixtures
         self.statusCode = statusCode
         self.retryAfter = retryAfter
         self.overlapBarrier = overlapBarrier
+        self.searchCoordinator = searchCoordinator
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [FixtureURLProtocol.self]
         self.session = URLSession(configuration: configuration)
         FixtureURLProtocol.install(transport: self)
     }
 
-    fileprivate func response(for request: URLRequest) -> (kind: String, response: HTTPURLResponse, data: Data) {
+    fileprivate func response(for request: URLRequest) -> (kind: String, language: String?, response: HTTPURLResponse, data: Data) {
         lock.lock()
         userAgents.append(request.value(forHTTPHeaderField: "User-Agent") ?? "")
         lock.unlock()
-        let key = request.url?.host == queryServiceURL.host ? "gate" : request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "action" })?.value } == "wbgetentities" ? "entities" : "search"
+        let queryItems = request.url.flatMap {
+            URLComponents(url: $0, resolvingAgainstBaseURL: false)?.queryItems
+        } ?? []
+        let action = queryItems.first(where: { $0.name == "action" })?.value
+        let language = queryItems.first(where: { $0.name == "language" })?.value
+        let kind = request.url?.host == queryServiceURL.host
+            ? "gate"
+            : action == "wbgetentities" ? "entities" : "search"
+        let fixtureKey = kind == "search" && language.map({ fixtures["search-\($0)"] != nil }) == true
+            ? "search-\(language!)"
+            : kind
         var headers = [String: String]()
         if let retryAfter { headers["Retry-After"] = retryAfter }
         let response = HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: headers)!
-        return (key, response, fixtures[key]!)
+        return (kind, language, response, fixtures[fixtureKey]!)
     }
 
-    fileprivate func deliverWhenReady(kind: String, _ delivery: @escaping () -> Void) {
+    fileprivate func deliverWhenReady(kind: String, language: String?, _ delivery: @escaping () -> Void) {
+        if kind == "search", let language, let searchCoordinator {
+            searchCoordinator.arrive(language: language, delivery: delivery)
+            return
+        }
         guard let overlapBarrier, kind == "gate" || kind == "entities" else {
             delivery()
             return
@@ -244,7 +347,7 @@ private final class FixtureURLProtocol: URLProtocol {
         let activeTransport = request.url?.host.flatMap(Self.registry.transport(forHost:))
         guard let activeTransport else { return }
         let result = activeTransport.response(for: request)
-        activeTransport.deliverWhenReady(kind: result.kind) { [weak self] in
+        activeTransport.deliverWhenReady(kind: result.kind, language: result.language) { [weak self] in
             guard let self else { return }
             self.client?.urlProtocol(self, didReceive: result.response, cacheStoragePolicy: .notAllowed)
             self.client?.urlProtocol(self, didLoad: result.data)
@@ -253,6 +356,51 @@ private final class FixtureURLProtocol: URLProtocol {
     }
 
     override func stopLoading() {}
+}
+
+private final class SearchRequestCoordinator: @unchecked Sendable {
+    private let expectedLanguages: Set<String>
+    private let releaseOrder: [String]
+    private let lock = NSLock()
+    private var deliveries: [String: () -> Void] = [:]
+    private var started = Set<String>()
+    private var delivered: [String] = []
+    private var didReleaseAfterAllStarted = false
+
+    init(expectedLanguages: Set<String>, releaseOrder: [String]) {
+        self.expectedLanguages = expectedLanguages
+        self.releaseOrder = releaseOrder
+    }
+
+    var startedLanguages: Set<String> {
+        lock.withLock { started }
+    }
+
+    var deliveredLanguages: [String] {
+        lock.withLock { delivered }
+    }
+
+    var releasedAfterAllStarted: Bool {
+        lock.withLock { didReleaseAfterAllStarted }
+    }
+
+    func arrive(language: String, delivery: @escaping () -> Void) {
+        let pending: [(String, () -> Void)] = lock.withLock {
+            started.insert(language)
+            deliveries[language] = delivery
+            guard expectedLanguages.isSubset(of: started) else { return [] }
+            didReleaseAfterAllStarted = true
+            let pending = releaseOrder.compactMap { language in
+                deliveries.removeValue(forKey: language).map { (language, $0) }
+            }
+            return pending
+        }
+
+        for item in pending {
+            lock.withLock { delivered.append(item.0) }
+            item.1()
+        }
+    }
 }
 
 private final class RequestOverlapBarrier: @unchecked Sendable {
