@@ -33,6 +33,28 @@ struct SearchModelTests {
         #expect(candidates.count == 2)
     }
 
+    @Test("Search dismissal preserves a result until a new query begins")
+    func preservesResolvedStateWhenSearchDismissalClearsQuery() async {
+        let model = SearchModel(resolver: MockTaxonResolver())
+
+        await model.resolveImmediately("Bondrée apivore")
+        guard case .resolved = model.state else {
+            Issue.record("Expected the initial lookup to resolve")
+            return
+        }
+
+        model.queryText = ""
+        model.searchTextDidChange()
+        guard case .resolved = model.state else {
+            Issue.record("Expected search dismissal to preserve the resolved result")
+            return
+        }
+
+        model.queryText = "Passer"
+        model.searchTextDidChange()
+        #expect(model.state == .loading)
+    }
+
     @Test("Output language edits preserve order and ignore duplicates")
     func editsOutputLanguages() {
         let model = SearchModel(resolver: MockTaxonResolver())

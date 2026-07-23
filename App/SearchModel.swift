@@ -60,6 +60,10 @@ final class SearchModel {
     func searchTextDidChange() {
         searchTask?.cancel()
         guard let query = TaxonSearchQuery(queryText) else {
+            // `dismissSearch()` may clear the searchable binding after a result
+            // arrives. Keep that result visible; a new nonempty query will
+            // replace it normally.
+            if case .resolved = state { return }
             state = .idle
             return
         }
