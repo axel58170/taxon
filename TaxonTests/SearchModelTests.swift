@@ -20,6 +20,31 @@ struct SearchModelTests {
         #expect(taxon.scientificName.value == "Pernis apivorus")
     }
 
+    @Test(
+        "Mock resolver resolves scientific names across taxonomic groups",
+        arguments: [
+            ("Quercus robur", "Q165145"),
+            ("Bellis perennis", "Q159297"),
+            ("Vulpes vulpes", "Q8332"),
+            ("Apis mellifera", "Q30034")
+        ]
+    )
+    func resolvesScientificNamesAcrossTaxonomicGroups(
+        scientificName: String,
+        expectedWikidataID: String
+    ) async {
+        let model = SearchModel(resolver: MockTaxonResolver())
+
+        await model.resolveImmediately(scientificName)
+
+        guard case let .resolved(taxon) = model.state else {
+            Issue.record("Expected \(scientificName) to resolve")
+            return
+        }
+        #expect(taxon.wikidataID.rawValue == expectedWikidataID)
+        #expect(taxon.scientificName.value == scientificName)
+    }
+
     @Test("Mock resolver preserves ambiguity for prefix matches")
     func retainsAmbiguity() async {
         let model = SearchModel(resolver: MockTaxonResolver())

@@ -24,6 +24,34 @@ struct MockTaxonResolver: TaxonResolving {
             rank: "species",
             names: [("en", "Eurasian Tree Sparrow"), ("fr", "Moineau friquet"), ("nl", "Ringmus")],
             sitelinks: [("en", "Eurasian_tree_sparrow"), ("nl", "Ringmus")]
+        ),
+        Self.makeTaxon(
+            id: "Q165145",
+            scientificName: "Quercus robur",
+            rank: "species",
+            names: [("en", "Pedunculate Oak"), ("fr", "Chêne pédonculé"), ("nl", "Zomereik")],
+            sitelinks: [("en", "Quercus_robur"), ("fr", "Chêne_pédonculé"), ("nl", "Zomereik")]
+        ),
+        Self.makeTaxon(
+            id: "Q159297",
+            scientificName: "Bellis perennis",
+            rank: "species",
+            names: [("en", "Common Daisy"), ("fr", "Pâquerette"), ("nl", "Madeliefje")],
+            sitelinks: [("en", "Bellis_perennis"), ("fr", "Pâquerette"), ("nl", "Madeliefje")]
+        ),
+        Self.makeTaxon(
+            id: "Q8332",
+            scientificName: "Vulpes vulpes",
+            rank: "species",
+            names: [("en", "Red Fox"), ("fr", "Renard roux"), ("nl", "Vos")],
+            sitelinks: [("en", "Red_fox"), ("fr", "Renard_roux"), ("nl", "Vos_(dier)")]
+        ),
+        Self.makeTaxon(
+            id: "Q30034",
+            scientificName: "Apis mellifera",
+            rank: "species",
+            names: [("en", "Western Honey Bee"), ("fr", "Abeille européenne"), ("nl", "Europese honingbij")],
+            sitelinks: [("en", "Western_honey_bee"), ("fr", "Apis_mellifera"), ("nl", "Europese_honingbij")]
         )
     ]
 

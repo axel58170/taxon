@@ -1,6 +1,6 @@
 # Taxon
 
-Taxon is a lightweight iOS utility for resolving a biological taxon and presenting its common names in a user-defined order of languages. Its initial data source is Wikidata; its initial use case is birds, without making birds a constraint of the core model.
+Taxon is a lightweight iOS utility for resolving biological taxa—including animals, plants, fungi, and other taxonomic groups—and presenting their common names in a user-defined order of languages. Its initial data source is Wikidata.
 
 ## Status
 

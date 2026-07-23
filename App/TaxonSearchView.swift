@@ -10,11 +10,7 @@ struct TaxonSearchView: View {
             Group {
                 switch model.state {
                 case .idle:
-                    ContentUnavailableView(
-                        "Find a taxon",
-                        systemImage: "leaf",
-                        description: Text("Search a common or scientific name.")
-                    )
+                    TaxonSearchWelcome(resolve: model.resolveImmediately)
                 case .loading:
                     ProgressView("Resolving taxon…")
                 case let .candidates(candidates):
@@ -55,6 +51,74 @@ struct TaxonSearchView: View {
         if case .resolved = model.state { return true }
         return false
     }
+}
+
+private struct TaxonSearchWelcome: View {
+    let resolve: (String) async -> Void
+
+    private let examples = [
+        TaxonSearchExample(name: "English oak", scientificName: "Quercus robur", symbol: "tree"),
+        TaxonSearchExample(name: "Common daisy", scientificName: "Bellis perennis", symbol: "camera.macro"),
+        TaxonSearchExample(name: "Red fox", scientificName: "Vulpes vulpes", symbol: "pawprint"),
+        TaxonSearchExample(name: "Western honey bee", scientificName: "Apis mellifera", symbol: "ladybug")
+    ]
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                ContentUnavailableView(
+                    "Find any taxon",
+                    systemImage: "leaf",
+                    description: Text("Search a common or scientific name.")
+                )
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Try an example")
+                        .font(.headline)
+
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 145), spacing: 10)],
+                        spacing: 10
+                    ) {
+                        ForEach(examples) { example in
+                            Button {
+                                Task { await resolve(example.scientificName) }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: example.symbol)
+                                        .frame(width: 24)
+                                        .foregroundStyle(.tint)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(example.name)
+                                            .font(.subheadline.weight(.semibold))
+                                        Text(example.scientificName)
+                                            .font(.caption)
+                                            .italic()
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                                .padding(.horizontal, 12)
+                            }
+                            .buttonStyle(.bordered)
+                            .accessibilityHint("Searches Wikidata for \(example.scientificName)")
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .padding(.vertical, 20)
+        }
+    }
+}
+
+private struct TaxonSearchExample: Identifiable {
+    let name: String
+    let scientificName: String
+    let symbol: String
+
+    var id: String { scientificName }
 }
 
 /// Must be a descendant of `.searchable` so SwiftUI supplies its active dismiss action.
