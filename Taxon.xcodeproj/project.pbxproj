@@ -14,13 +14,16 @@
 		14425F12E6BD5E6491C27028 /* WikidataProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 162E2415E00C3A657CFFF6C9 /* WikidataProvider */; };
 		21D13463208BC2DFC30F1CFC /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF892695383D2E4DC014F8D7 /* SearchModel.swift */; };
 		4798122FCC706DEE57BD7EA2 /* TaxonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1785A196B1B894A3659DD0 /* TaxonApp.swift */; };
+		4E943EFB0D0906CFE9C2E8D7 /* ShareTextLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */; };
 		6163E37CFA786C908BBF69E0 /* TaxonSettings in Frameworks */ = {isa = PBXBuildFile; productRef = 2E593E79D8030467B1B0B043 /* TaxonSettings */; };
 		618D4346EAB054E545AF0808 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D6D67B06D93CB32F1AB2F /* ShareViewController.swift */; };
 		62FF1B9C346D26FFB66EB3CE /* TaxonSettings in Frameworks */ = {isa = PBXBuildFile; productRef = 98C2C2907F8159DA02BA3942 /* TaxonSettings */; };
+		671EB303EEA3055D85833686 /* ShareTextLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */; };
 		7203C4C1580D943B4C6237C0 /* SearchModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484303881E854943D4373B74 /* SearchModelTests.swift */; };
 		83A0B11F626898C2A21FF94D /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25509033F973E037A627D1D2 /* ShareView.swift */; };
 		8B4CDDF5540FDA7D235F6A28 /* TaxonIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C75B55AA8D8188E33BACB2B9 /* TaxonIntents.swift */; };
 		BB5B050DFDCEB5735FA652A1 /* MockTaxonResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410776D309216F459D15BBC2 /* MockTaxonResolver.swift */; };
+		C1FF164368B639CBDDA07021 /* ShareTextLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01267AAFB5969E429F5B9FA9 /* ShareTextLoaderTests.swift */; };
 		C99A40F06843932422C015F4 /* TaxonDomain in Frameworks */ = {isa = PBXBuildFile; productRef = E45FC48E09BAF84A0A831D27 /* TaxonDomain */; };
 		D42C5DA1108BC6B4C8C12E72 /* TaxonDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 26A468F0874ECCBD3063DDE6 /* TaxonDomain */; };
 		E1E96BAF17325ADFEB61AD4E /* ShareResultFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */; };
@@ -62,7 +65,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01267AAFB5969E429F5B9FA9 /* ShareTextLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareTextLoaderTests.swift; sourceTree = "<group>"; };
 		028DB7F4190F81F3600B1D88 /* TaxonSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonSearchView.swift; sourceTree = "<group>"; };
+		1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareTextLoader.swift; sourceTree = "<group>"; };
 		1C8A43B034AE81FEE4D672F2 /* Taxon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Taxon.entitlements; sourceTree = "<group>"; };
 		1FE322559BADA7716BAF42AB /* TaxonTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TaxonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		25509033F973E037A627D1D2 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
@@ -124,6 +129,7 @@
 				A3841FF0A1E29D3579F1B6B8 /* Info.plist */,
 				4703850173C27008A82523AB /* ShareLookupModel.swift */,
 				4638E263F1F85BC2394F143C /* ShareResultFormatter.swift */,
+				1355FE75E8CD0B1C1E851779 /* ShareTextLoader.swift */,
 				25509033F973E037A627D1D2 /* ShareView.swift */,
 				2C4D6D67B06D93CB32F1AB2F /* ShareViewController.swift */,
 				A25CBE25E959479FE9019246 /* TaxonShareExtension.entitlements */,
@@ -135,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				25CF0F54D62C5F76BBC4782F /* ShareResultFormatterTests.swift */,
+				01267AAFB5969E429F5B9FA9 /* ShareTextLoaderTests.swift */,
 			);
 			path = ShareExtensionTests;
 			sourceTree = "<group>";
@@ -333,6 +340,7 @@
 			files = (
 				F026F32EDEC5AE1CFFF9BEB6 /* ShareLookupModel.swift in Sources */,
 				E1E96BAF17325ADFEB61AD4E /* ShareResultFormatter.swift in Sources */,
+				4E943EFB0D0906CFE9C2E8D7 /* ShareTextLoader.swift in Sources */,
 				83A0B11F626898C2A21FF94D /* ShareView.swift in Sources */,
 				618D4346EAB054E545AF0808 /* ShareViewController.swift in Sources */,
 			);
@@ -365,6 +373,8 @@
 			files = (
 				0644FAD17B3F247898421185 /* ShareResultFormatter.swift in Sources */,
 				03A09F090E440D4A62791028 /* ShareResultFormatterTests.swift in Sources */,
+				671EB303EEA3055D85833686 /* ShareTextLoader.swift in Sources */,
+				C1FF164368B639CBDDA07021 /* ShareTextLoaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

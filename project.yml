@@ -88,6 +88,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
     sources:
       - path: ShareExtension/ShareResultFormatter.swift
+      - path: ShareExtension/ShareTextLoader.swift
       - path: ShareExtensionTests
     dependencies:
       - package: TaxonKit

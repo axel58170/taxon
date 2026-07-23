@@ -1,8 +1,6 @@
-import CoreTransferable
 import SwiftUI
 import TaxonSettings
 import UIKit
-import UniformTypeIdentifiers
 import WikidataProvider
 
 @MainActor
@@ -40,12 +38,9 @@ final class ShareViewController: UIViewController {
     }
 
     private func loadSharedText() async {
-        guard let provider = firstPlainTextProvider() else {
-            model.failToLoadInput()
-            return
-        }
         do {
-            let text = try await loadPlainText(from: provider)
+            let items = extensionContext?.inputItems.compactMap { $0 as? NSExtensionItem } ?? []
+            let text = try await ShareTextLoader.loadText(from: items)
             guard !Task.isCancelled else { return }
             await model.resolve(text)
         } catch is CancellationError {
@@ -53,20 +48,5 @@ final class ShareViewController: UIViewController {
         } catch {
             model.failToLoadInput()
         }
-    }
-
-    private func loadPlainText(from provider: NSItemProvider) async throws -> String {
-        try await withCheckedThrowingContinuation { continuation in
-            _ = provider.loadTransferable(type: String.self) { result in
-                continuation.resume(with: result)
-            }
-        }
-    }
-
-    private func firstPlainTextProvider() -> NSItemProvider? {
-        let items = extensionContext?.inputItems.compactMap { $0 as? NSExtensionItem } ?? []
-        return items
-            .flatMap { $0.attachments ?? [] }
-            .first { $0.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) }
     }
 }
