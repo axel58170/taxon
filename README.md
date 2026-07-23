@@ -4,7 +4,7 @@ Taxon is a lightweight iOS utility for resolving a biological taxon and presenti
 
 ## Status
 
-The repository is being scaffolded from the product requirements in [PRD.md](PRD.md). The first working increment will provide SwiftUI search, fixture-backed Wikidata resolution, configurable output languages, and App Intents. Share Sheet support, durable caching, and the broader v1 acceptance criteria follow as separate increments.
+The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered output languages, a reusable domain package, fixture-tested Wikidata resolution, and App Intents. Share Sheet support, durable caching, and the remaining v1 acceptance criteria are intentionally deferred.
 
 ## Architecture
 
@@ -44,7 +44,7 @@ Prerequisites:
 - Xcode 26 or later with an iOS simulator runtime.
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen) for regenerating the project from `project.yml`.
 
-Once the Swift entry point and package manifest have been added, generate and open the project:
+Generate and open the project:
 
 ```sh
 xcodegen generate
@@ -59,7 +59,11 @@ xcodebuild -project Taxon.xcodeproj -scheme Taxon -destination 'platform=iOS Sim
 swift test --package-path Packages/TaxonKit
 ```
 
-The repository currently contains only the generator configuration and directory layout; it becomes buildable when the next scaffold commit adds the Swift entry point and package manifest.
+`Taxon.xcodeproj` is generated from `project.yml` and committed so the app can also be opened immediately. Regenerate it after changing targets, package products, or build settings.
+
+The main app uses the live Wikidata provider. Package and app tests remain deterministic: they use constructed JSON fixtures and the in-memory mock resolver, never the live service.
+
+The Wikipedia-opening intent uses `OpenURLIntent`, which is available on iOS 18 and later. The rest of the app and intent surface retains the iOS 17 deployment target.
 
 ## Development conventions
 
