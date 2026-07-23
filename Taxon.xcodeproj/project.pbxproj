@@ -12,8 +12,10 @@
 		4798122FCC706DEE57BD7EA2 /* TaxonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1785A196B1B894A3659DD0 /* TaxonApp.swift */; };
 		62FF1B9C346D26FFB66EB3CE /* WikidataProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 0CDE34F94AD5167A85DA93F5 /* WikidataProvider */; };
 		7203C4C1580D943B4C6237C0 /* SearchModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484303881E854943D4373B74 /* SearchModelTests.swift */; };
+		8B4CDDF5540FDA7D235F6A28 /* TaxonIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C75B55AA8D8188E33BACB2B9 /* TaxonIntents.swift */; };
 		BB5B050DFDCEB5735FA652A1 /* MockTaxonResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410776D309216F459D15BBC2 /* MockTaxonResolver.swift */; };
 		C99A40F06843932422C015F4 /* TaxonDomain in Frameworks */ = {isa = PBXBuildFile; productRef = E45FC48E09BAF84A0A831D27 /* TaxonDomain */; };
+		F14F4D1A06CB88FA26A2127D /* TaxonIntentFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6793117EECE20D8F1FDD641C /* TaxonIntentFormattingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,8 +36,10 @@
 		484303881E854943D4373B74 /* SearchModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModelTests.swift; sourceTree = "<group>"; };
 		4E3B6FDEDD5BFE4A50BF9E4B /* TaxonKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TaxonKit; path = Packages/TaxonKit; sourceTree = SOURCE_ROOT; };
 		5A1785A196B1B894A3659DD0 /* TaxonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonApp.swift; sourceTree = "<group>"; };
+		6793117EECE20D8F1FDD641C /* TaxonIntentFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonIntentFormattingTests.swift; sourceTree = "<group>"; };
 		998466F992CABDF5C5A20B14 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		A797D23631B7154AB1D6FC23 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		C75B55AA8D8188E33BACB2B9 /* TaxonIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonIntents.swift; sourceTree = "<group>"; };
 		EF892695383D2E4DC014F8D7 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,6 +63,7 @@
 				410776D309216F459D15BBC2 /* MockTaxonResolver.swift */,
 				EF892695383D2E4DC014F8D7 /* SearchModel.swift */,
 				5A1785A196B1B894A3659DD0 /* TaxonApp.swift */,
+				C75B55AA8D8188E33BACB2B9 /* TaxonIntents.swift */,
 				028DB7F4190F81F3600B1D88 /* TaxonSearchView.swift */,
 			);
 			path = App;
@@ -77,6 +82,7 @@
 			children = (
 				A797D23631B7154AB1D6FC23 /* .gitkeep */,
 				484303881E854943D4373B74 /* SearchModelTests.swift */,
+				6793117EECE20D8F1FDD641C /* TaxonIntentFormattingTests.swift */,
 			);
 			path = TaxonTests;
 			sourceTree = "<group>";
@@ -181,6 +187,7 @@
 				BB5B050DFDCEB5735FA652A1 /* MockTaxonResolver.swift in Sources */,
 				21D13463208BC2DFC30F1CFC /* SearchModel.swift in Sources */,
 				4798122FCC706DEE57BD7EA2 /* TaxonApp.swift in Sources */,
+				8B4CDDF5540FDA7D235F6A28 /* TaxonIntents.swift in Sources */,
 				052AFFBB535DBAAF47835266 /* TaxonSearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -190,6 +197,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7203C4C1580D943B4C6237C0 /* SearchModelTests.swift in Sources */,
+				F14F4D1A06CB88FA26A2127D /* TaxonIntentFormattingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
