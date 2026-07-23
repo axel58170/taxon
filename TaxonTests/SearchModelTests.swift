@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import Taxon
 import TaxonDomain
+import TaxonSettings
 
 @MainActor
 struct SearchModelTests {
@@ -42,5 +43,25 @@ struct SearchModelTests {
         model.removeLanguages(at: IndexSet(integer: 1))
 
         #expect(model.configuredLanguages.map(\.rawValue) == ["de", "fr", "nl"])
+    }
+
+    @Test("Output setting edits persist and initialize the next model")
+    func persistsOutputSettings() {
+        let suiteName = "SearchModelTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = SharedOutputSettingsStore(userDefaults: defaults)
+        let model = SearchModel(resolver: MockTaxonResolver(), settingsStore: store)
+
+        model.addLanguage(code: "de")
+        model.moveLanguages(from: IndexSet(integer: 3), to: 0)
+        model.removeLanguages(at: IndexSet(integer: 1))
+        model.scientificNamePosition = .first
+        model.preferredWikipediaLanguage = TaxonLanguage(rawValue: "de")
+
+        let reloaded = SearchModel(resolver: MockTaxonResolver(), settingsStore: store)
+        #expect(reloaded.configuredLanguages.map(\.rawValue) == ["de", "fr", "nl"])
+        #expect(reloaded.scientificNamePosition == .first)
+        #expect(reloaded.preferredWikipediaLanguage?.rawValue == "de")
     }
 }

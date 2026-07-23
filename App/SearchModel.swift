@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import TaxonDomain
+import TaxonSettings
 
 @MainActor
 @Observable
@@ -16,11 +17,18 @@ final class SearchModel {
 
     var queryText = ""
     var state: State = .idle
-    var configuredLanguages: [TaxonLanguage]
-    var scientificNamePosition: ScientificNamePosition
-    var preferredWikipediaLanguage: TaxonLanguage?
+    var configuredLanguages: [TaxonLanguage] {
+        didSet { persistSettings() }
+    }
+    var scientificNamePosition: ScientificNamePosition {
+        didSet { persistSettings() }
+    }
+    var preferredWikipediaLanguage: TaxonLanguage? {
+        didSet { persistSettings() }
+    }
 
     private let resolver: any TaxonResolving
+    private let settingsStore: SharedOutputSettingsStore?
     private var searchTask: Task<Void, Never>?
 
     init(
@@ -31,12 +39,15 @@ final class SearchModel {
             TaxonLanguage(rawValue: "nl")!
         ],
         scientificNamePosition: ScientificNamePosition = .last,
-        preferredWikipediaLanguage: TaxonLanguage? = TaxonLanguage(rawValue: "en")
+        preferredWikipediaLanguage: TaxonLanguage? = TaxonLanguage(rawValue: "en"),
+        settingsStore: SharedOutputSettingsStore? = nil
     ) {
+        let persistedSettings = settingsStore?.load()
         self.resolver = resolver
-        self.configuredLanguages = configuredLanguages
-        self.scientificNamePosition = scientificNamePosition
-        self.preferredWikipediaLanguage = preferredWikipediaLanguage
+        self.settingsStore = settingsStore
+        self.configuredLanguages = persistedSettings?.languages ?? configuredLanguages
+        self.scientificNamePosition = persistedSettings?.scientificNamePosition ?? scientificNamePosition
+        self.preferredWikipediaLanguage = persistedSettings?.preferredWikipediaLanguage ?? preferredWikipediaLanguage
     }
 
     var outputConfiguration: OutputLanguageConfiguration {
@@ -114,6 +125,14 @@ final class SearchModel {
         case let .candidates(candidates): state = .candidates(candidates)
         case .noMatch: state = .noMatch
         }
+    }
+
+    private func persistSettings() {
+        settingsStore?.save(OutputSettingsSnapshot(
+            languages: configuredLanguages,
+            scientificNamePosition: scientificNamePosition,
+            preferredWikipediaLanguage: preferredWikipediaLanguage
+        ))
     }
 
     private static func message(for error: TaxonResolutionError) -> String {

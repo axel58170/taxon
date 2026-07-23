@@ -1,42 +1,33 @@
 import AppIntents
 import Foundation
 import TaxonDomain
+import TaxonSettings
 
 /// The app-owned adapter between App Intents and the reusable resolver boundary.
-/// It keeps output-language defaults in one explicit composition point until settings persist.
 final class TaxonIntentService: Sendable {
     let resolver: any TaxonResolving
-    let configuredLanguages: [TaxonLanguage]
-    let scientificNamePosition: ScientificNamePosition
-    let preferredWikipediaLanguage: TaxonLanguage?
+    let settingsStore: SharedOutputSettingsStore
 
     init(
         resolver: any TaxonResolving,
-        configuredLanguages: [TaxonLanguage] = TaxonIntentFormatting.defaultLanguages,
-        scientificNamePosition: ScientificNamePosition = .last,
-        preferredWikipediaLanguage: TaxonLanguage? = TaxonLanguage(rawValue: "en")
+        settingsStore: SharedOutputSettingsStore
     ) {
         self.resolver = resolver
-        self.configuredLanguages = configuredLanguages
-        self.scientificNamePosition = scientificNamePosition
-        self.preferredWikipediaLanguage = preferredWikipediaLanguage
+        self.settingsStore = settingsStore
     }
 
-    func resolve(_ text: String) async throws -> TaxonResolution {
+    func resolve(_ text: String) async throws -> (resolution: TaxonResolution, settings: OutputSettingsSnapshot) {
         guard let query = TaxonSearchQuery(text) else { throw TaxonIntentError.emptyQuery }
-        return try await resolver.resolve(query: query, languages: configuredLanguages)
+        let settings = settingsStore.load()
+        let resolution = try await resolver.resolve(query: query, languages: settings.languages)
+        return (resolution, settings)
     }
 
-    func taxon(for id: String) async throws -> Taxon? {
-        guard let wikidataID = WikidataID(rawValue: id) else { return nil }
-        return try await resolver.taxon(for: wikidataID, languages: configuredLanguages)
-    }
-
-    var outputConfiguration: OutputLanguageConfiguration {
-        OutputLanguageConfiguration(
-            languages: configuredLanguages,
-            scientificNamePosition: scientificNamePosition
-        )
+    func taxon(for id: String) async throws -> (taxon: Taxon?, settings: OutputSettingsSnapshot) {
+        let settings = settingsStore.load()
+        guard let wikidataID = WikidataID(rawValue: id) else { return (nil, settings) }
+        let taxon = try await resolver.taxon(for: wikidataID, languages: settings.languages)
+        return (taxon, settings)
     }
 }
 
@@ -70,19 +61,21 @@ struct TaxonEntityQuery: EntityStringQuery {
     func entities(for identifiers: [TaxonEntity.ID]) async throws -> [TaxonEntity] {
         var entities: [TaxonEntity] = []
         for identifier in identifiers {
-            if let taxon = try await service.taxon(for: identifier) {
-                entities.append(TaxonEntity(taxon: taxon, preferredLanguages: service.configuredLanguages))
+            let result = try await service.taxon(for: identifier)
+            if let taxon = result.taxon {
+                entities.append(TaxonEntity(taxon: taxon, preferredLanguages: result.settings.languages))
             }
         }
         return entities
     }
 
     func entities(matching string: String) async throws -> [TaxonEntity] {
-        switch try await service.resolve(string) {
+        let result = try await service.resolve(string)
+        switch result.resolution {
         case let .resolved(taxon):
-            return [TaxonEntity(taxon: taxon, preferredLanguages: service.configuredLanguages)]
+            return [TaxonEntity(taxon: taxon, preferredLanguages: result.settings.languages)]
         case let .candidates(candidates):
-            return candidates.map { TaxonEntity(taxon: $0.taxon, preferredLanguages: service.configuredLanguages) }
+            return candidates.map { TaxonEntity(taxon: $0.taxon, preferredLanguages: result.settings.languages) }
         case .noMatch:
             return []
         }
@@ -105,9 +98,10 @@ struct ResolveTaxonIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<TaxonEntity> {
-        switch try await service.resolve(name) {
+        let result = try await service.resolve(name)
+        switch result.resolution {
         case let .resolved(taxon):
-            return .result(value: TaxonEntity(taxon: taxon, preferredLanguages: service.configuredLanguages))
+            return .result(value: TaxonEntity(taxon: taxon, preferredLanguages: result.settings.languages))
         case let .candidates(candidates):
             let choices = TaxonIntentFormatting.uniqueCandidateChoices(candidates)
             let selectedChoice = try await $name.requestDisambiguation(
@@ -117,7 +111,7 @@ struct ResolveTaxonIntent: AppIntent {
             guard let selected = choices.first(where: { $0.title == selectedChoice })?.candidate else {
                 throw TaxonIntentError.selectionUnavailable
             }
-            return .result(value: TaxonEntity(taxon: selected.taxon, preferredLanguages: service.configuredLanguages))
+            return .result(value: TaxonEntity(taxon: selected.taxon, preferredLanguages: result.settings.languages))
         case .noMatch:
             throw TaxonIntentError.noMatchingTaxon
         }
@@ -141,7 +135,7 @@ struct GetTaxonNameIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
         guard let language = TaxonLanguage(rawValue: language) else { throw TaxonIntentError.invalidLanguage }
-        guard let resolvedTaxon = try await service.taxon(for: taxon.id) else { throw TaxonIntentError.noMatchingTaxon }
+        guard let resolvedTaxon = try await service.taxon(for: taxon.id).taxon else { throw TaxonIntentError.noMatchingTaxon }
         guard let name = resolvedTaxon.preferredName(for: language)?.value else { throw TaxonIntentError.nameUnavailable }
         return .result(value: name)
     }
@@ -160,8 +154,13 @@ struct GetConfiguredTaxonNamesIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        guard let resolvedTaxon = try await service.taxon(for: taxon.id) else { throw TaxonIntentError.noMatchingTaxon }
-        return .result(value: TaxonIntentFormatting.formattedNames(for: resolvedTaxon, configuration: service.outputConfiguration))
+        let result = try await service.taxon(for: taxon.id)
+        guard let resolvedTaxon = result.taxon else { throw TaxonIntentError.noMatchingTaxon }
+        let configuration = OutputLanguageConfiguration(
+            languages: result.settings.languages,
+            scientificNamePosition: result.settings.scientificNamePosition
+        )
+        return .result(value: TaxonIntentFormatting.formattedNames(for: resolvedTaxon, configuration: configuration))
     }
 }
 
@@ -182,11 +181,12 @@ struct OpenTaxonInWikipediaIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & OpensIntent {
         if let language, TaxonLanguage(rawValue: language) == nil { throw TaxonIntentError.invalidLanguage }
-        guard let resolvedTaxon = try await service.taxon(for: taxon.id) else { throw TaxonIntentError.noMatchingTaxon }
-        let preferredLanguage = language.flatMap { TaxonLanguage(rawValue: $0) } ?? service.preferredWikipediaLanguage
+        let result = try await service.taxon(for: taxon.id)
+        guard let resolvedTaxon = result.taxon else { throw TaxonIntentError.noMatchingTaxon }
+        let preferredLanguage = language.flatMap { TaxonLanguage(rawValue: $0) } ?? result.settings.preferredWikipediaLanguage
         guard let sitelink = resolvedTaxon.wikipediaSitelink(
             preferredLanguage: preferredLanguage,
-            configuredLanguages: service.configuredLanguages
+            configuredLanguages: result.settings.languages
         ) else {
             throw TaxonIntentError.wikipediaUnavailable
         }

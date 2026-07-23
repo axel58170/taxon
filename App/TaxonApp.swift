@@ -1,5 +1,6 @@
 import SwiftUI
 import AppIntents
+import TaxonSettings
 import WikidataProvider
 
 @main
@@ -8,8 +9,9 @@ struct TaxonApp: App {
 
     init() {
         let resolver = WikidataProvider()
-        let intentService = TaxonIntentService(resolver: resolver)
-        _searchModel = State(initialValue: SearchModel(resolver: resolver))
+        let settingsStore = SharedOutputSettingsStore.production()
+        let intentService = TaxonIntentService(resolver: resolver, settingsStore: settingsStore)
+        _searchModel = State(initialValue: SearchModel(resolver: resolver, settingsStore: settingsStore))
         AppDependencyManager.shared.add(dependency: intentService)
     }
 

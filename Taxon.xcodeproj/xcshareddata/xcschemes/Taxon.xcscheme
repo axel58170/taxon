@@ -50,6 +50,17 @@
                ReferencedContainer = "container:Taxon.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "33BE74EEA06825A15AAF6BB4"
+               BuildableName = "TaxonShareExtensionTests.xctest"
+               BlueprintName = "TaxonShareExtensionTests"
+               ReferencedContainer = "container:Taxon.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

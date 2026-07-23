@@ -4,7 +4,7 @@ Taxon is a lightweight iOS utility for resolving a biological taxon and presenti
 
 ## Status
 
-The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered output languages, a reusable domain package, fixture-tested Wikidata resolution, and App Intents. Share Sheet support, durable caching, and the remaining v1 acceptance criteria are intentionally deferred.
+The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered output languages, a reusable domain package, fixture-tested Wikidata resolution, App Intents, and a plain-text Share Extension. Durable caching and the remaining v1 acceptance criteria are intentionally deferred.
 
 ## Architecture
 
@@ -17,6 +17,8 @@ Taxon (iOS application)
     │   ├── canonical taxon and localized-name values
     │   ├── query normalization and resolution rules
     │   └── provider protocols
+    ├── TaxonSettings
+    │   └── App Group-backed output-language configuration
     └── WikidataProvider
         ├── Action API and SPARQL transport
         ├── response DTOs and mapping
@@ -65,9 +67,15 @@ The main app uses the live Wikidata provider. Package and app tests remain deter
 
 The Wikipedia-opening intent uses `OpenURLIntent`, which is available on iOS 18 and later. The rest of the app and intent surface retains the iOS 17 deployment target.
 
+The app, App Intents, and Share Extension share language settings through the `group.com.taxon.app` App Group. Device builds require an Apple Developer account and provisioning profiles for both `com.taxon.app` and `com.taxon.app.share` that include this App Group.
+
 ### Testing App Intents
 
-Install and launch Taxon once, then open Shortcuts and choose **New Shortcut → Add Action → Apps → Taxon**. Taxon exposes **Resolve Taxon**, **Get Taxon Name**, and **Get Configured Taxon Names** on iOS 17 and later. App Intents do not add an app to the system Share Sheet; that surface requires the separate Share Extension planned for a later increment.
+Install and launch Taxon once, then open Shortcuts and choose **New Shortcut → Add Action → Apps → Taxon**. Taxon exposes **Resolve Taxon**, **Get Taxon Name**, and **Get Configured Taxon Names** on iOS 17 and later. The separately embedded Share Extension provides Taxon’s Share Sheet entry.
+
+### Testing the Share Extension
+
+Install and launch Taxon once, configure the output languages, then select or share plain text from another app. Choose **Taxon** in the Share Sheet. The extension resolves the text and displays every configured language plus the scientific name, preserving the configured order. Individual available names and the complete available result can be copied.
 
 ## Development conventions
 
