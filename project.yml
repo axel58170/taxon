@@ -1,0 +1,96 @@
+name: Taxon
+options:
+  bundleIdPrefix: com.taxon
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    DEVELOPMENT_TEAM: 4H5463Q72N
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+packages:
+  TaxonKit:
+    path: Packages/TaxonKit
+targets:
+  Taxon:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+    dependencies:
+      - package: TaxonKit
+        product: TaxonDomain
+      - package: TaxonKit
+        product: TaxonSettings
+      - package: TaxonKit
+        product: WikidataProvider
+      - target: TaxonShareExtension
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.axelgraff.taxon
+        CODE_SIGN_ENTITLEMENTS: App/Taxon.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    scheme:
+      testTargets:
+        - TaxonTests
+        - TaxonShareExtensionTests
+  TaxonShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShareExtension
+    dependencies:
+      - package: TaxonKit
+        product: TaxonDomain
+      - package: TaxonKit
+        product: TaxonSettings
+      - package: TaxonKit
+        product: WikidataProvider
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Taxon
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.axelgraff.taxon.share
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/TaxonShareExtension.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+  TaxonTests:
+    type: bundle.unit-test
+    platform: iOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+    sources:
+      - path: TaxonTests
+    dependencies:
+      - target: Taxon
+  TaxonShareExtensionTests:
+    type: bundle.unit-test
+    platform: iOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+    sources:
+      - path: ShareExtension/ShareResultFormatter.swift
+      - path: ShareExtension/ShareTextLoader.swift
+      - path: ShareExtensionTests
+    dependencies:
+      - package: TaxonKit
+        product: TaxonDomain
