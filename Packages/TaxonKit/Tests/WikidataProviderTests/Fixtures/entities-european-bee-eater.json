@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "Q170718": {
+      "labels": {
+        "en": { "language": "en", "value": "European bee-eater" },
+        "fr": { "language": "fr", "value": "Guêpier d'Europe" },
+        "nl": { "language": "nl", "value": "Bijeneter" },
+        "it": { "language": "it", "value": "Merops apiaster" }
+      },
+      "aliases": {
+        "en": [{ "language": "en", "value": "Bee-eater" }],
+        "fr": [{ "language": "fr", "value": "Guêpier" }],
+        "nl": [{ "language": "nl", "value": "Europese bijeneter" }],
+        "it": [{ "language": "it", "value": "gruccione" }]
+      },
+      "claims": {
+        "P225": [
+          {
+            "mainsnak": {
+              "datavalue": { "value": "Merops apiaster", "type": "string" }
+            }
+          }
+        ],
+        "P105": [
+          {
+            "mainsnak": {
+              "datavalue": {
+                "value": {
+                  "entity-type": "item",
+                  "numeric-id": 7432,
+                  "id": "Q7432"
+                },
+                "type": "wikibase-entityid"
+              }
+            }
+          }
+        ],
+        "P1843": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "datavalue": {
+                "value": { "text": "European Bee-eater", "language": "en" },
+                "type": "monolingualtext"
+              }
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "datavalue": {
+                "value": { "text": "Guêpier d'Europe", "language": "fr" },
+                "type": "monolingualtext"
+              }
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "datavalue": {
+                "value": { "text": "Bijeneter", "language": "nl" },
+                "type": "monolingualtext"
+              }
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "datavalue": {
+                "value": { "text": "Gruccione", "language": "it" },
+                "type": "monolingualtext"
+              }
+            }
+          },
+          {
+            "rank": "deprecated",
+            "mainsnak": {
+              "datavalue": {
+                "value": { "text": "Deprecated gruccione", "language": "it" },
+                "type": "monolingualtext"
+              }
+            }
+          }
+        ]
+      },
+      "sitelinks": {}
+    }
+  }
+}

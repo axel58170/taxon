@@ -65,12 +65,12 @@ struct WikidataProviderTests {
         #expect(taxon.preferredName(for: TaxonLanguage(rawValue: "de")!) == nil)
     }
 
-    @Test("A scientific Italian label does not hide the Common swift vernacular alias")
+    @Test("P1843 takes precedence over a Common swift vernacular alias")
     func rejectsScientificEquivalentLabel() async throws {
         let taxon = try #require(await commonSwift(languages: [italian]))
 
         #expect(taxon.scientificName.value == "Apus apus")
-        #expect(taxon.preferredName(for: italian)?.value == "Rondone")
+        #expect(taxon.preferredName(for: italian)?.value == "Rondone comune")
     }
 
     @Test("A regional Italian request falls back to the base-language vernacular name")
@@ -78,7 +78,7 @@ struct WikidataProviderTests {
         let regionalItalian = try #require(TaxonLanguage(rawValue: "it-IT"))
         let taxon = try #require(await commonSwift(languages: [regionalItalian]))
 
-        #expect(taxon.preferredName(for: regionalItalian)?.value == "Rondone")
+        #expect(taxon.preferredName(for: regionalItalian)?.value == "Rondone comune")
     }
 
     @Test("P1843 supplies a common name when labels and aliases are only scientific")
@@ -86,6 +86,26 @@ struct WikidataProviderTests {
         let taxon = try #require(await commonSwift(languages: [english]))
 
         #expect(taxon.preferredName(for: english)?.value == "Common swift")
+    }
+
+    @Test("European Bee-eater prefers P1843 common names in every requested language")
+    func prefersEuropeanBeeEaterCommonNameClaims() async throws {
+        let taxon = try #require(await europeanBeeEater(languages: [english, french, dutch, italian]))
+
+        #expect(taxon.wikidataID.rawValue == "Q170718")
+        #expect(taxon.scientificName.value == "Merops apiaster")
+        #expect(taxon.preferredName(for: english)?.value == "European Bee-eater")
+        #expect(taxon.preferredName(for: french)?.value == "Guêpier d'Europe")
+        #expect(taxon.preferredName(for: dutch)?.value == "Bijeneter")
+        #expect(taxon.preferredName(for: italian)?.value == "Gruccione")
+    }
+
+    @Test("Deprecated P1843 values are excluded")
+    func excludesDeprecatedCommonNameClaims() async throws {
+        let taxon = try #require(await europeanBeeEater(languages: [italian]))
+
+        #expect(taxon.names.contains(where: { $0.value == "Deprecated gruccione" }) == false)
+        #expect(taxon.preferredName(for: italian)?.value == "Gruccione")
     }
 
     @Test("A non-taxon search result is rejected by the SPARQL gate")
@@ -122,6 +142,16 @@ struct WikidataProviderTests {
                 entities: "entities-common-swift"
             )
         ).taxon(for: WikidataID(rawValue: "Q25377")!, languages: languages)
+    }
+
+    private func europeanBeeEater(languages: [TaxonLanguage]) async throws -> Taxon? {
+        try await provider(
+            FixtureTransport(
+                search: "search-scientific",
+                gate: "gate-european-bee-eater",
+                entities: "entities-european-bee-eater"
+            )
+        ).taxon(for: WikidataID(rawValue: "Q170718")!, languages: languages)
     }
 }
 

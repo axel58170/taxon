@@ -112,6 +112,14 @@ public struct LocalizedTaxonName: Codable, Hashable, Sendable, Identifiable {
 
     public var id: String { "\(language.rawValue)|\(value)|\(regionCode ?? "")" }
 
+    /// A minimally normalized presentation value that preserves source spelling
+    /// beyond the first character.
+    public var displayValue: String {
+        guard let first = value.first else { return value }
+        let locale = Locale(identifier: language.rawValue)
+        return String(first).uppercased(with: locale) + value.dropFirst()
+    }
+
     public init?(
         language: TaxonLanguage,
         value: String,

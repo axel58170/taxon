@@ -136,7 +136,7 @@ struct GetTaxonNameIntent: AppIntent {
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
         guard let language = TaxonLanguage(rawValue: language) else { throw TaxonIntentError.invalidLanguage }
         guard let resolvedTaxon = try await service.taxon(for: taxon.id).taxon else { throw TaxonIntentError.noMatchingTaxon }
-        guard let name = resolvedTaxon.preferredName(for: language)?.value else { throw TaxonIntentError.nameUnavailable }
+        guard let name = resolvedTaxon.preferredName(for: language)?.displayValue else { throw TaxonIntentError.nameUnavailable }
         return .result(value: name)
     }
 }
@@ -235,7 +235,7 @@ enum TaxonIntentFormatting {
 
     static func displayName(for taxon: Taxon, preferredLanguages: [TaxonLanguage]) -> String? {
         for language in preferredLanguages {
-            if let name = taxon.preferredName(for: language)?.value { return name }
+            if let name = taxon.preferredName(for: language)?.displayValue { return name }
         }
         return nil
     }
@@ -245,7 +245,7 @@ enum TaxonIntentFormatting {
             switch row {
             case let .scientific(name): return "Scientific: \(name.value)"
             case let .localized(language, name):
-                return "\(language.rawValue): \(name?.value ?? "Not available")"
+                return "\(language.rawValue): \(name?.displayValue ?? "Not available")"
             }
         }.joined(separator: "\n")
     }

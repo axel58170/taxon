@@ -226,7 +226,7 @@ private struct NameRow: View {
     private var name: String? {
         switch row {
         case let .scientific(scientificName): return scientificName.value
-        case let .localized(_, localizedName): return localizedName?.value
+        case let .localized(_, localizedName): return localizedName?.displayValue
         }
     }
 

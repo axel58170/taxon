@@ -68,6 +68,16 @@ struct TaxonDomainTests {
         #expect(ScientificName("   ") == nil)
     }
 
+    @Test("Localized names capitalize only their first character for display and copying")
+    func capitalizesLocalizedNameForPresentation() throws {
+        let italian = try #require(TaxonLanguage(rawValue: "it"))
+        let japanese = try #require(TaxonLanguage(rawValue: "ja"))
+
+        #expect(LocalizedTaxonName(language: italian, value: "gruccione")?.displayValue == "Gruccione")
+        #expect(LocalizedTaxonName(language: french, value: "guêpier d'Europe")?.displayValue == "Guêpier d'Europe")
+        #expect(LocalizedTaxonName(language: japanese, value: "ヨーロッパハチクイ")?.displayValue == "ヨーロッパハチクイ")
+    }
+
     private func makeTaxon(
         names: [LocalizedTaxonName] = [],
         sitelinks: [WikipediaSitelink] = []

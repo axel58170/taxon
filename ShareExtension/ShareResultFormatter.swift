@@ -18,7 +18,7 @@ enum ShareResultFormatter {
                 return ShareResultRow(
                     id: "localized-\(language.rawValue)",
                     label: language.rawValue,
-                    value: name?.value,
+                    value: name?.displayValue,
                     isScientific: false
                 )
             }

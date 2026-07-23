@@ -267,9 +267,9 @@ private struct EntityResponse: Decodable {
                 let aliases = aliases?[code]?.map(\.value) ?? []
 
                 let orderedCandidates = preferredClaims
+                    + normalClaims
                     + (label.map { [$0] } ?? [])
                     + aliases
-                    + normalClaims
 
                 var seen = Set<String>()
                 let usableCandidates = orderedCandidates.filter { candidate in

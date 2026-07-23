@@ -1,0 +1,11 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "item": { "value": "http://www.wikidata.org/entity/Q170718" },
+        "rank": { "value": "http://www.wikidata.org/entity/Q7432" },
+        "rankLabel": { "value": "species" }
+      }
+    ]
+  }
+}
