@@ -89,11 +89,28 @@ private struct ShareNameRow: View {
     @State private var copied = false
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(label).foregroundStyle(.secondary)
-            Spacer()
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(label)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .frame(width: 96, alignment: .leading)
+                .layoutPriority(1)
             if let value = row.value {
-                Text(value).multilineTextAlignment(.trailing)
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text(value)
+                        .multilineTextAlignment(.trailing)
+                        .lineLimit(2)
+
+                    if let alternativeNamesText = row.alternativeNamesText {
+                        Text(alternativeNamesText)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                            .truncationMode(.tail)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 Button {
                     UIPasteboard.general.string = value
                     copied = true
@@ -111,7 +128,9 @@ private struct ShareNameRow: View {
                 )
                 .sensoryFeedback(.success, trigger: copied)
             } else {
-                Text("Not available").foregroundStyle(.secondary)
+                Text("Not available")
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
     }

@@ -5,6 +5,7 @@ struct ShareResultRow: Hashable, Identifiable, Sendable {
     let id: String
     let label: String
     let value: String?
+    let alternativeNamesText: String?
     let isScientific: Bool
 }
 
@@ -17,13 +18,19 @@ enum ShareResultFormatter {
                     id: "scientific",
                     label: String(localized: "Scientific"),
                     value: name.value,
+                    alternativeNamesText: nil,
                     isScientific: true
                 )
             case let .localized(language, name):
+                let alternativeNamesText = taxon
+                    .alternativeNames(for: language)
+                    .map(\.displayValue)
+                    .joined(separator: ", ")
                 return ShareResultRow(
                     id: "localized-\(language.rawValue)",
                     label: language.rawValue,
                     value: name?.displayValue,
+                    alternativeNamesText: alternativeNamesText.isEmpty ? nil : alternativeNamesText,
                     isScientific: false
                 )
             }
