@@ -26,6 +26,8 @@ targets:
       - package: TaxonKit
         product: TaxonSettings
       - package: TaxonKit
+        product: CatalogueOfLifeProvider
+      - package: TaxonKit
         product: WikidataProvider
       - target: TaxonShareExtension
         embed: true
@@ -52,6 +54,8 @@ targets:
         product: TaxonDomain
       - package: TaxonKit
         product: TaxonSettings
+      - package: TaxonKit
+        product: CatalogueOfLifeProvider
       - package: TaxonKit
         product: WikidataProvider
     info:

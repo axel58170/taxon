@@ -1,8 +1,10 @@
 import SwiftUI
+import CatalogueOfLifeProvider
 import TaxonDomain
 
 struct TaxonSearchView: View {
     @Bindable var model: SearchModel
+    let catalogueOfLife: CatalogueOfLifeProvider
     @State private var showingSettings = false
 
     var body: some View {
@@ -42,14 +44,17 @@ struct TaxonSearchView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Languages", systemImage: "globe") {
+                    Button("Settings", systemImage: "gearshape") {
                         showingSettings = true
                     }
-                    .accessibilityLabel("Configure languages")
+                    .accessibilityLabel("Settings")
                 }
             }
             .sheet(isPresented: $showingSettings) {
-                LanguageSettings(model: model)
+                AppSettingsView(
+                    model: model,
+                    catalogueOfLife: catalogueOfLife
+                )
             }
         }
     }
@@ -134,7 +139,6 @@ private struct TaxonSearchWelcome: View {
                                             .font(.subheadline.weight(.semibold))
                                         Text(example.scientificName)
                                             .font(.caption)
-                                            .italic()
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer(minLength: 0)
@@ -201,7 +205,6 @@ private struct CandidateList: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(candidate.taxon.scientificName.value)
                                         .font(.headline)
-                                        .italic()
                                     if let matchedName = candidate.matchedName,
                                        TaxonSearchQuery.normalize(matchedName)
                                         != TaxonSearchQuery.normalize(candidate.taxon.scientificName.value) {
@@ -253,19 +256,10 @@ private struct TaxonResultView: View {
         List {
             Section("Names in your languages") {
                 ForEach(configuration.displayRows(for: taxon)) { row in
-                    NameRow(row: row)
-                }
-            }
-
-            if let rank = taxon.rank {
-                Section("Taxon") {
-                    HStack(spacing: 12) {
-                        Label(localizedRankName(rank), systemImage: "point.3.connected.trianglepath.dotted")
-                        Spacer(minLength: 8)
-                        Text(taxon.wikidataID.rawValue)
-                            .foregroundStyle(.secondary)
-                    }
-                    .font(.subheadline)
+                    NameRow(
+                        row: row,
+                        alternativeNames: alternativeNames(for: row)
+                    )
                 }
             }
 
@@ -292,6 +286,11 @@ private struct TaxonResultView: View {
             }
         }
     }
+
+    private func alternativeNames(for row: TaxonDisplayRow) -> [LocalizedTaxonName] {
+        guard case let .localized(language, _) = row else { return [] }
+        return taxon.alternativeNames(for: language)
+    }
 }
 
 private func localizedRankName(_ rank: TaxonomicRank) -> String {
@@ -300,7 +299,7 @@ private func localizedRankName(_ rank: TaxonomicRank) -> String {
 
 private struct NameRow: View {
     let row: TaxonDisplayRow
-    @State private var copied = false
+    let alternativeNames: [LocalizedTaxonName]
 
     private var label: String {
         switch row {
@@ -318,55 +317,53 @@ private struct NameRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(label)
                 .foregroundStyle(.secondary)
-            Spacer()
-            if let name {
-                Text(name)
-                    .multilineTextAlignment(.trailing)
-                    .italic(isScientific)
-                Button {
-                    copy(name)
-                } label: {
-                    Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
-                        .contentTransition(.symbolEffect(.replace))
-                }
-                .labelStyle(.iconOnly)
-                .foregroundStyle(copied ? Color.green : Color.accentColor)
-                .accessibilityLabel(
-                    copied
-                        ? String(localized: "Copied")
-                        : String(localized: "Copy \(label) name")
+                .lineLimit(2)
+                .frame(
+                    minWidth: 88,
+                    idealWidth: 104,
+                    maxWidth: 125,
+                    alignment: .leading
                 )
-                .sensoryFeedback(.success, trigger: copied)
+            if let name {
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text(name)
+                        .multilineTextAlignment(.trailing)
+                        .lineLimit(2)
+
+                    if !alternativeNames.isEmpty {
+                        Text(
+                            alternativeNames
+                                .map(\.displayValue)
+                                .joined(separator: ", ")
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .truncationMode(.tail)
+                        .multilineTextAlignment(.trailing)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .layoutPriority(1)
             } else {
                 Text("Not available")
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("\(label) name not available")
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
-        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+        .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+        .accessibilityElement(children: .combine)
     }
 
-    private var isScientific: Bool {
-        if case .scientific = row { return true }
-        return false
-    }
-
-    private func copy(_ name: String) {
-        UIPasteboard.general.string = name
-        copied = true
-        Task {
-            try? await Task.sleep(for: .seconds(1.5))
-            copied = false
-        }
-    }
 }
 
-private struct LanguageSettings: View {
+private struct AppSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var model: SearchModel
+    let catalogueOfLife: CatalogueOfLifeProvider
     @State private var languageCode = ""
     @FocusState private var isLanguageFieldFocused: Bool
 
@@ -418,11 +415,20 @@ private struct LanguageSettings: View {
                         }
                     }
                 }
+
+                Section("About") {
+                    NavigationLink {
+                        DataSourcesView(catalogueOfLife: catalogueOfLife)
+                    } label: {
+                        Label("Data sources", systemImage: "books.vertical")
+                    }
+                }
             }
-            .environment(\.editMode, .constant(.active))
-            .navigationTitle("Languages")
-            .task { isLanguageFieldFocused = true }
+            .navigationTitle("Settings")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }

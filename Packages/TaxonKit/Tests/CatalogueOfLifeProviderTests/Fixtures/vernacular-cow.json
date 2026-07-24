@@ -1,0 +1,21 @@
+{
+  "offset": 0,
+  "limit": 20,
+  "total": 3,
+  "result": [
+    {
+      "taxonID": "3BQW",
+      "name": "Cow",
+      "language": "eng"
+    },
+    {
+      "taxonID": "MLQ5",
+      "name": "Cow",
+      "language": "eng"
+    },
+    {
+      "taxonID": "OTHER",
+      "name": "Cowbird"
+    }
+  ]
+}

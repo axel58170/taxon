@@ -1,0 +1,95 @@
+{
+  "offset": 0,
+  "limit": 20,
+  "total": 3,
+  "result": [
+    {
+      "usage": {
+        "id": "wrong-qid",
+        "status": "accepted",
+        "name": {
+          "scientificName": "Merops apiaster",
+          "rank": "species"
+        },
+        "identifier": ["wikidata:Q999"]
+      },
+      "vernacularNames": [
+        {
+          "name": "Wrong taxon name",
+          "language": "eng",
+          "preferred": true
+        }
+      ]
+    },
+    {
+      "usage": {
+        "id": "3ZW55",
+        "status": "accepted",
+        "name": {
+          "scientificName": "Merops apiaster",
+          "rank": "species"
+        },
+        "identifier": ["gbif:2473075", "wikidata:Q170718"]
+      },
+      "vernacularNames": [
+        {
+          "name": "Bee-eater",
+          "language": "eng"
+        },
+        {
+          "name": "European Bee-eater",
+          "language": "eng",
+          "preferred": true
+        },
+        {
+          "name": "Guêpier d'Europe",
+          "language": "fra"
+        },
+        {
+          "name": "Bijeneter",
+          "language": "nld"
+        },
+        {
+          "name": "Gruccione",
+          "language": "ita",
+          "preferred": true,
+          "country": "IT",
+          "area": "Italy"
+        },
+        {
+          "name": "  Gruccione  ",
+          "language": "ita",
+          "preferred": false,
+          "country": "IT"
+        },
+        {
+          "name": "Merops apiaster",
+          "language": "eng"
+        },
+        {
+          "name": "黄喉蜂虎",
+          "language": "zho"
+        }
+      ]
+    },
+    {
+      "usage": {
+        "id": "synonym",
+        "status": "synonym",
+        "name": {
+          "scientificName": "Merops apiaster",
+          "rank": "species"
+        },
+        "identifier": ["wikidata:Q170718"]
+      },
+      "vernacularNames": [
+        {
+          "name": "Synonym result name",
+          "language": "eng"
+        }
+      ]
+    }
+  ],
+  "empty": false,
+  "last": true
+}

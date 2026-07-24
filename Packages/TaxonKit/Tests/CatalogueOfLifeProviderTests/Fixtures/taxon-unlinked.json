@@ -1,0 +1,11 @@
+{
+  "id": "UNLINKED",
+  "status": "accepted",
+  "name": {
+    "scientificName": "Unlinked taxon",
+    "rank": "species"
+  },
+  "identifier": [
+    "gbif:123"
+  ]
+}

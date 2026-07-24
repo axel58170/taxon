@@ -1,0 +1,12 @@
+{
+  "id": "MLQ5",
+  "status": "accepted",
+  "name": {
+    "scientificName": "Bos taurus",
+    "rank": "species"
+  },
+  "identifier": [
+    "inat:74113",
+    "wikidata:Q19610691"
+  ]
+}

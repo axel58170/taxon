@@ -78,6 +78,61 @@ struct TaxonDomainTests {
         #expect(LocalizedTaxonName(language: japanese, value: "ヨーロッパハチクイ")?.displayValue == "ヨーロッパハチクイ")
     }
 
+    @Test("Alternative names omit the preferred value and normalized duplicates in stable order")
+    func selectsAlternativeNames() throws {
+        let preferred = try #require(
+            LocalizedTaxonName(
+                language: dutch,
+                value: "Gedomesticeerd rund",
+                source: .wikidata,
+                isPreferred: true
+            )
+        )
+        let cow = try #require(
+            LocalizedTaxonName(
+                language: dutch,
+                value: "koe",
+                source: .catalogueOfLife,
+                isPreferred: false
+            )
+        )
+        let duplicateCow = try #require(
+            LocalizedTaxonName(
+                language: dutch,
+                value: "KÓE",
+                source: .wikidata,
+                isPreferred: false
+            )
+        )
+        let domesticatedCow = try #require(
+            LocalizedTaxonName(
+                language: dutch,
+                value: "gedomesticeerde koe",
+                source: .catalogueOfLife,
+                isPreferred: false
+            )
+        )
+        let englishName = try #require(
+            LocalizedTaxonName(
+                language: english,
+                value: "Cow",
+                source: .catalogueOfLife,
+                isPreferred: false
+            )
+        )
+        let taxon = makeTaxon(names: [
+            cow,
+            preferred,
+            duplicateCow,
+            domesticatedCow,
+            englishName
+        ])
+
+        #expect(taxon.preferredName(for: dutch) == preferred)
+        #expect(taxon.alternativeNames(for: dutch) == [cow, domesticatedCow])
+        #expect(taxon.alternativeNames(for: french).isEmpty)
+    }
+
     private func makeTaxon(
         names: [LocalizedTaxonName] = [],
         sitelinks: [WikipediaSitelink] = []

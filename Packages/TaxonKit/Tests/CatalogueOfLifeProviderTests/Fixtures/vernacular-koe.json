@@ -1,0 +1,17 @@
+{
+  "offset": 0,
+  "limit": 20,
+  "total": 2,
+  "result": [
+    {
+      "taxonID": "MLQ5",
+      "name": "Gedomesticeerde Koe",
+      "language": "nld"
+    },
+    {
+      "taxonID": "MLQ5",
+      "name": "Koe",
+      "language": "nld"
+    }
+  ]
+}

@@ -40,7 +40,7 @@ struct ShareView: View {
                 model.select(candidate)
             } label: {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(candidate.taxon.scientificName.value).italic()
+                    Text(candidate.taxon.scientificName.value)
                     if let matchedName = candidate.matchedName { Text(matchedName).foregroundStyle(.secondary) }
                     if let rank = candidate.taxon.rank { Text(rank.name.capitalized).font(.caption).foregroundStyle(.secondary) }
                 }
@@ -93,7 +93,7 @@ private struct ShareNameRow: View {
             Text(label).foregroundStyle(.secondary)
             Spacer()
             if let value = row.value {
-                Text(value).italic(row.isScientific).multilineTextAlignment(.trailing)
+                Text(value).multilineTextAlignment(.trailing)
                 Button {
                     UIPasteboard.general.string = value
                     copied = true
