@@ -50,6 +50,7 @@ public struct NameSource: RawRepresentable, Codable, Hashable, Sendable {
         self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    public static let catalogueOfLife = NameSource(rawValue: "catalogue-of-life")
     public static let wikidata = NameSource(rawValue: "wikidata")
 }
 
@@ -195,6 +196,18 @@ public struct Taxon: Codable, Hashable, Sendable, Identifiable {
     public func preferredName(for language: TaxonLanguage) -> LocalizedTaxonName? {
         let matchingNames = names.filter { $0.language == language }
         return matchingNames.first(where: \.isPreferred) ?? matchingNames.first
+    }
+
+    /// Other localized names for the language, preserving provider order while
+    /// omitting the preferred value and normalized duplicates.
+    public func alternativeNames(for language: TaxonLanguage) -> [LocalizedTaxonName] {
+        guard let preferredName = preferredName(for: language) else { return [] }
+
+        var seen = Set([TaxonSearchQuery.normalize(preferredName.value)])
+        return names.filter { name in
+            guard name.language == language else { return false }
+            return seen.insert(TaxonSearchQuery.normalize(name.value)).inserted
+        }
     }
 
     /// Selects an existing sitelink using preferred language, configured order, then a stable any-language fallback.

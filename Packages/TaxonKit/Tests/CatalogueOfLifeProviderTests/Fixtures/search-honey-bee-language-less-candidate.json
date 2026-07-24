@@ -1,0 +1,44 @@
+{
+  "offset": 0,
+  "limit": 20,
+  "total": 2,
+  "result": [
+    {
+      "usage": {
+        "id": "apis-mellifera",
+        "status": "accepted",
+        "name": {
+          "scientificName": "Apis mellifera",
+          "rank": "species"
+        },
+        "identifier": ["wikidata:Q30034"]
+      },
+      "vernacularNames": [
+        {
+          "name": "Ape europea",
+          "language": "ita",
+          "preferred": true,
+          "country": "IT"
+        }
+      ]
+    },
+    {
+      "usage": {
+        "id": "unrelated-candidate",
+        "status": "accepted",
+        "name": {
+          "scientificName": "Apis cerana",
+          "rank": "species"
+        },
+        "identifier": ["wikidata:Q203422"]
+      },
+      "vernacularNames": [
+        {
+          "name": "Eastern honey bee"
+        }
+      ]
+    }
+  ],
+  "empty": false,
+  "last": true
+}

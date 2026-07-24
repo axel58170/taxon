@@ -1,0 +1,11 @@
+{
+  "id": "3BQW",
+  "status": "accepted",
+  "name": {
+    "scientificName": "Bos",
+    "rank": "genus"
+  },
+  "identifier": [
+    "wikidata:Q237993"
+  ]
+}

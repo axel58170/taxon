@@ -1,4 +1,5 @@
 import SwiftUI
+import CatalogueOfLifeProvider
 import TaxonSettings
 import UIKit
 import WikidataProvider
@@ -6,7 +7,9 @@ import WikidataProvider
 @MainActor
 final class ShareViewController: UIViewController {
     private let model = ShareLookupModel(
-        resolver: WikidataProvider(),
+        resolver: CatalogueOfLifePrimaryResolver(
+            secondary: WikidataProvider()
+        ),
         settings: SharedOutputSettingsStore.production().load()
     )
     private var loadTask: Task<Void, Never>?

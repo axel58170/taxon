@@ -1,0 +1,42 @@
+{
+  "offset": 0,
+  "limit": 20,
+  "total": 2,
+  "result": [
+    {
+      "usage": {
+        "id": "wrong-name",
+        "status": "accepted",
+        "name": {
+          "scientificName": "Merops orientalis",
+          "rank": "species"
+        },
+        "identifier": ["wikidata:Q170718"]
+      },
+      "vernacularNames": [
+        {
+          "name": "Asian Green Bee-eater",
+          "language": "eng"
+        }
+      ]
+    },
+    {
+      "usage": {
+        "id": "missing-qid",
+        "status": "accepted",
+        "name": {
+          "scientificName": "Merops apiaster",
+          "rank": "species"
+        }
+      },
+      "vernacularNames": [
+        {
+          "name": "European Bee-eater",
+          "language": "eng"
+        }
+      ]
+    }
+  ],
+  "empty": false,
+  "last": true
+}

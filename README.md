@@ -1,10 +1,10 @@
 # Taxon
 
-Taxon is a lightweight iOS utility for resolving biological taxa—including animals, plants, fungi, and other taxonomic groups—and presenting their common names in a user-defined order of languages. Its initial data source is Wikidata.
+Taxon is a lightweight iOS utility for resolving biological taxa—including animals, plants, fungi, and other taxonomic groups—and presenting their common names in a user-defined order of languages. Catalogue of Life is the primary discovery and vernacular-name source, with Wikidata providing canonical identity verification and Wikipedia links.
 
 ## Status
 
-The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered languages, a reusable domain package, fixture-tested Wikidata resolution, App Intents, and a plain-text Share Extension. Durable caching and the remaining v1 acceptance criteria are intentionally deferred.
+The initial working increment is implemented: SwiftUI search and result presentation, configurable ordered languages, a reusable domain package, fixture-tested Catalogue of Life and Wikidata resolution, App Intents, a plain-text Share Extension, and dynamic Catalogue of Life release attribution in Settings. Durable caching and the remaining v1 acceptance criteria are intentionally deferred.
 
 The app and Share Extension are localized in English, French, Dutch, and Italian. The interface language follows iOS and is independent of the ordered languages configured for taxon lookup and results.
 
@@ -21,25 +21,29 @@ Taxon (iOS application)
     │   └── provider protocols
     ├── TaxonSettings
     │   └── App Group-backed language configuration
+    ├── CatalogueOfLifeProvider
+    │   ├── scientific and vernacular discovery
+    │   └── Wikidata-verified resolver composition
     └── WikidataProvider
         ├── Action API and SPARQL transport
         ├── response DTOs and mapping
         └── Wikidata-specific identifiers and semantics
 ```
 
-`TaxonDomain` is intentionally provider-independent and Foundation-only. A taxon’s canonical identity comprises a validated Wikidata Q-ID and its scientific name. Wikidata is the initial authority for that Q-ID, while source-specific identifiers from eBird, GBIF, IOC, or other providers remain external enrichment rather than core identity.
+`TaxonDomain` is intentionally provider-independent and Foundation-only. A taxon’s canonical identity comprises a validated Wikidata Q-ID and its scientific name. Catalogue of Life is the primary discovery and vernacular-name source; Wikidata verifies the linked Q-ID, supplies the authoritative `P225` scientific name, and hydrates Wikipedia sitelinks. Source-specific identifiers from Catalogue of Life, eBird, GBIF, IOC, or other providers remain external enrichment rather than core identity.
 
-The application and App Intents depend on a resolver protocol, so tests and previews can use deterministic fixtures. `WikidataProvider` is the only module that knows Wikidata HTTP payload shapes and properties.
+The application and App Intents depend on a resolver protocol, so tests and previews can use deterministic fixtures. `WikidataProvider` is the only module that knows Wikidata HTTP payload shapes and properties. `CatalogueOfLifeProvider` searches both scientific and vernacular indexes and accepts results only when the COL scientific name and linked Wikidata identifier agree with Wikidata hydration; Catalogue of Life identifiers and DTOs remain private to that module.
 
-## Wikidata lookup approach
+## Lookup approach
 
 1. Normalize text locally for comparison while retaining the original input for the request.
-2. Discover a bounded candidate set with Wikidata’s `wbsearchentities` API.
-3. Verify candidates are taxa with a bounded Wikidata Query Service request.
-4. Hydrate eligible Q-IDs through `wbgetentities`, retrieving `P225` (scientific taxon name), `P105` (taxonomic rank), labels, aliases, and Wikipedia sitelinks.
-5. Rank exact scientific-name and configured-language matches ahead of less precise matches. Ambiguous results remain candidates for the user to choose.
+2. Search the current Catalogue of Life Extended Release's scientific-name and dataset-wide vernacular indexes concurrently.
+3. Keep exact normalized matches, hydrate only their bounded COL taxon IDs, and require an accepted usage with a linked Wikidata Q-ID.
+4. Hydrate that Q-ID through Wikidata, verifying that `P225` agrees with the COL scientific name and retrieving taxonomic rank, labels, aliases, and Wikipedia sitelinks.
+5. Preserve all exact common-name matches as explicit candidates rather than silently guessing.
+6. If COL has no verified match or is unavailable, use the existing bounded Wikidata text-search, taxon-gating, and hydration path as a compatibility fallback.
 
-Scientific names always come from `P225` when available. Wikipedia links always come from real Wikidata sitelinks, using preferred Wikipedia language, configured languages, then any available article as fallback.
+Scientific names always come from `P225` after identity verification. Wikipedia links always come from real Wikidata sitelinks, using preferred Wikipedia language, configured languages, then any available article as fallback. Cancellation propagates, but a Catalogue of Life transport or decoding failure does not prevent the Wikidata compatibility path from running.
 
 ## Build
 
@@ -65,7 +69,7 @@ swift test --package-path Packages/TaxonKit
 
 `Taxon.xcodeproj` is generated from `project.yml` and committed so the app can also be opened immediately. Regenerate it after changing targets, package products, or build settings.
 
-The main app uses the live Wikidata provider. Package and app tests remain deterministic: they use constructed JSON fixtures and the in-memory mock resolver, never the live service.
+The main app uses Catalogue of Life discovery with Wikidata identity verification and fallback. Package and app tests remain deterministic: they use constructed JSON fixtures and the in-memory mock resolver, never live services.
 
 The Wikipedia-opening intent uses `OpenURLIntent`, which is available on iOS 18 and later. The rest of the app and intent surface retains the iOS 17 deployment target.
 
