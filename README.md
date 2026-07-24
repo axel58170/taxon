@@ -71,6 +71,13 @@ The Wikipedia-opening intent uses `OpenURLIntent`, which is available on iOS 18 
 
 The app, App Intents, and Share Extension share language settings through the `group.com.axelgraff.taxon` App Group. Device builds require an Apple Developer account and provisioning profiles for both `com.axelgraff.taxon` and `com.axelgraff.taxon.share` that include this App Group.
 
+## Going live
+
+Release preparation, TestFlight setup, website work, App Store metadata, and
+launch checks are tracked in
+[docs/launch/GO_LIVE.md](docs/launch/GO_LIVE.md). Credentials, signing material,
+and App Store Connect API keys must not be committed.
+
 ### Testing App Intents
 
 Install and launch Taxon once, then open Shortcuts and choose **New Shortcut → Add Action → Apps → Taxon**. Taxon exposes **Resolve Taxon**, **Get Taxon Name**, and **Get Configured Taxon Names** on iOS 17 and later. The separately embedded Share Extension provides Taxon’s Share Sheet entry.
